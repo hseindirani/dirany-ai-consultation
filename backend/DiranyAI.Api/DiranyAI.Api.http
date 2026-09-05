@@ -1,0 +1,6 @@
+@DiranyAI.Api_HostAddress = http://localhost:5091
+
+GET {{DiranyAI.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

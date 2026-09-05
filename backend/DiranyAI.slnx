@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DiranyAI.Api/DiranyAI.Api.csproj" />
+  <Project Path="DiranyAI.Tests/DiranyAI.Tests.csproj" />
+</Solution>
