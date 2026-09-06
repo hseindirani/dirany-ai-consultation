@@ -3,6 +3,7 @@ using System;
 using DiranyAI.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DiranyAI.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260906230619_AddHairAndBeardStyles")]
+    partial class AddHairAndBeardStyles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,48 +155,6 @@ namespace DiranyAI.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("BeardStyles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            AiPromptHint = "short boxed beard with clean defined cheek lines, neckline, and even length",
-                            Description = "A neatly trimmed short beard with defined cheek and neckline edges.",
-                            IsActive = true,
-                            Name = "Short Boxed Beard"
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            AiPromptHint = "well-groomed pointy beard tapering toward a defined point at the chin",
-                            Description = "A shaped beard that gradually narrows toward a defined point at the chin.",
-                            IsActive = true,
-                            Name = "Pointy Beard"
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            AiPromptHint = "Italian-style full beard with a structured shape, clean cheek lines, and well-groomed finish",
-                            Description = "A full, well-groomed beard with a defined shape and clean contours.",
-                            IsActive = true,
-                            Name = "Italian Beard"
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            AiPromptHint = "short even designer stubble with clean cheek and neckline edges",
-                            Description = "Very short facial hair maintained at an even length for a natural rugged look.",
-                            IsActive = true,
-                            Name = "Stubble"
-                        },
-                        new
-                        {
-                            Id = 5L,
-                            AiPromptHint = "full natural beard with balanced volume, groomed shape, and clean edges",
-                            Description = "A full beard with natural volume covering the cheeks, jawline, and chin.",
-                            IsActive = true,
-                            Name = "Full Beard"
-                        });
                 });
 
             modelBuilder.Entity("DiranyAI.Api.Styles.HairStyle", b =>
@@ -228,48 +189,6 @@ namespace DiranyAI.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("HairStyles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            AiPromptHint = "taper fade haircut with a clean gradual transition around the temples and neckline",
-                            Description = "A gradual fade around the sideburns and neckline while keeping more length around the sides and top.",
-                            IsActive = true,
-                            Name = "Taper Fade"
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            AiPromptHint = "short buzz cut with even length and a clean natural hairline",
-                            Description = "A very short, even haircut with a clean and simple finish.",
-                            IsActive = true,
-                            Name = "Buzz Cut"
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            AiPromptHint = "modern mohawk with short sides and a defined longer strip through the center",
-                            Description = "Shorter sides with a distinct longer strip of hair through the center.",
-                            IsActive = true,
-                            Name = "Mohawk"
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            AiPromptHint = "textured crop haircut with short sides and natural textured hair on top",
-                            Description = "Short sides with a textured top styled naturally forward.",
-                            IsActive = true,
-                            Name = "Textured Crop"
-                        },
-                        new
-                        {
-                            Id = 5L,
-                            AiPromptHint = "slicked-back hairstyle with longer hair on top styled naturally backward",
-                            Description = "Longer hair on top styled backward for a clean structured look.",
-                            IsActive = true,
-                            Name = "Slick Back"
-                        });
                 });
 
             modelBuilder.Entity("DiranyAI.Api.Consultations.Consultation", b =>
