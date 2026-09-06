@@ -1,15 +1,23 @@
 using DiranyAI.Api.Common.Middleware;
+using DiranyAI.Api.Consultations;
 using DiranyAI.Api.Customers;
 using DiranyAI.Api.Data;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<CustomerService>();
+builder.Services.AddScoped<ConsultationService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 

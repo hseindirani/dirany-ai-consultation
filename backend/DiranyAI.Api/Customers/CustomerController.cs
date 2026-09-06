@@ -21,8 +21,15 @@ public class CustomerController : ControllerBase
         var customer = await _customerService.CreateCustomerAsync(request);
 
         return CreatedAtAction(
-            nameof(CreateCustomer),
+            nameof(GetCustomer),
             new { id = customer.Id },
             customer);
+    }
+    [HttpGet("{id:long}")]
+    public async Task<ActionResult<CustomerResponse>> GetCustomer(long id)
+    {
+        var customer = await _customerService.GetCustomerByIdAsync(id);
+
+        return Ok(customer);
     }
 }

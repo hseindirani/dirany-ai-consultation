@@ -20,6 +20,19 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Detail = exception.Message
             },
 
+            CustomerNotFoundException => new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Customer not found",
+                Detail = exception.Message
+            },
+            ConsultationNotFoundException => new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Consultation not found",
+                Detail = exception.Message
+            },
+
             _ => new ProblemDetails
             {
                 Status = StatusCodes.Status500InternalServerError,

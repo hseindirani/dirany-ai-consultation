@@ -47,4 +47,23 @@ public class CustomerService
             CreatedAt = customer.CreatedAt
         };
     }
-}
+    public async Task<CustomerResponse> GetCustomerByIdAsync(long id)
+    {
+        var customer = await _dbContext.Customers
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (customer is null)
+        {
+            throw new CustomerNotFoundException(id);
+        }
+
+            return new CustomerResponse
+            {
+                Id = customer.Id,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                PhoneNumber = customer.PhoneNumber,
+                CreatedAt = customer.CreatedAt
+            };
+        }
+    }
