@@ -17,3 +17,6 @@ dist/
 # Environment files / secrets
 .env
 .env.*
+
+# Uploaded customer images
+uploads/

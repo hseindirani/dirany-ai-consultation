@@ -17,4 +17,7 @@ public class Consultation
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset? CompletedAt { get; set; }
+
+    public ICollection<ConsultationImage> Images { get; set; }
+    = new List<ConsultationImage>();
 }

@@ -32,6 +32,12 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Title = "Consultation not found",
                 Detail = exception.Message
             },
+            ArgumentException => new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Invalid request",
+                Detail = exception.Message
+            },
 
             _ => new ProblemDetails
             {

@@ -8,10 +8,14 @@ namespace DiranyAI.Api.Consultations;
 public class ConsultationController : ControllerBase
 {
     private readonly ConsultationService _consultationService;
+    private readonly ConsultationImageService _consultationImageService;
 
-    public ConsultationController(ConsultationService consultationService)
+    public ConsultationController(
+        ConsultationService consultationService,
+        ConsultationImageService consultationImageService)
     {
         _consultationService = consultationService;
+        _consultationImageService = consultationImageService;
     }
 
     [HttpPost]
@@ -35,5 +39,18 @@ public class ConsultationController : ControllerBase
             .GetConsultationByIdAsync(id);
 
         return Ok(consultation);
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/images/original")]
+    public async Task<ActionResult<ConsultationImageResponse>> UploadOriginalImage(
+    long consultationId,
+    IFormFile file,
+    CancellationToken cancellationToken)
+    {
+        var image = await _consultationImageService.UploadOriginalAsync(
+            consultationId,
+            file,
+            cancellationToken);
+
+        return Ok(image);
     }
 }
