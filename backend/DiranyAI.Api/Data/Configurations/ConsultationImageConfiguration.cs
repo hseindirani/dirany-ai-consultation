@@ -22,5 +22,8 @@ public class ConsultationImageConfiguration
             .WithMany(c => c.Images)
             .HasForeignKey(i => i.ConsultationId)
             .IsRequired();
+        builder.HasOne(i => i.HairCandidate)
+            .WithMany()
+            .HasForeignKey(i => i.HairCandidateId);
     }
 }

@@ -37,4 +37,16 @@ public class LocalImageStorage : IImageStorage
             "uploads",
             uniqueFileName);
     }
+    public Task<Stream> OpenReadAsync(
+    string storagePath,
+    CancellationToken cancellationToken = default)
+    {
+        var fullPath = Path.Combine(
+            _environment.ContentRootPath,
+            storagePath);
+
+        Stream stream = File.OpenRead(fullPath);
+
+        return Task.FromResult(stream);
+    }
 }

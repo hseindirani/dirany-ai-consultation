@@ -6,4 +6,8 @@ public interface IImageStorage
         Stream imageStream,
         string fileName,
         CancellationToken cancellationToken = default);
+
+    Task<Stream> OpenReadAsync(
+        string storagePath,
+        CancellationToken cancellationToken = default);
 }
