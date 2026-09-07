@@ -14,4 +14,8 @@ export class Customer {
   }) {
     return this.http.post(this.apiUrl, customer);
   }
+
+  getCustomer(id: number) {
+    return this.http.get(`${this.apiUrl}/${id}`);
+  }
 }

@@ -1,0 +1,63 @@
+@if (consultation() && customer()) {
+  <main class="workspace">
+    <header class="customer-header">
+      <span class="status">In Progress</span>
+
+      <h1>
+        {{ customer().firstName }}
+        {{ customer().lastName }}
+      </h1>
+
+      <p>{{ customer().phoneNumber }}</p>
+    </header>
+
+    <section class="photo-section">
+      <div class="section-heading">
+        <span class="eyebrow">Step 1</span>
+        <h2>Current photo</h2>
+        <p>Choose a clear photo to use throughout the consultation.</p>
+      </div>
+
+      @if (previewUrl) {
+        <div class="photo-preview">
+          <img [src]="previewUrl" alt="Selected customer photo" />
+        </div>
+      }
+
+      <div class="photo-actions">
+        <label class="file-button">
+          Choose photo
+
+          <input
+            type="file"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+          />
+        </label>
+
+        @if (selectedFileName()) {
+          <span class="file-name">
+            {{ selectedFileName() }}
+          </span>
+        }
+
+        <button
+          class="upload-button"
+          type="button"
+          [disabled]="!selectedFile() || isUploading()"
+          (click)="uploadPhoto()"
+        >
+          {{ isUploading() ? 'Uploading...' : 'Upload photo' }}
+        </button>
+
+        @if (uploadSuccess()) {
+          <p class="upload-success">
+            Photo uploaded successfully.
+          </p>
+        }
+      </div>
+    </section>
+  </main>
+} @else {
+  <p>Loading consultation...</p>
+}
