@@ -111,4 +111,21 @@ public class BeardCandidateService
             CreatedAt = candidate.CreatedAt
         };
     }
+    public async Task<List<BeardCandidateResponse>> GetAllAsync(
+    long consultationId,
+    CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.BeardCandidates
+            .Where(c => c.ConsultationId == consultationId)
+            .OrderBy(c => c.CreatedAt)
+            .Select(c => new BeardCandidateResponse
+            {
+                Id = c.Id,
+                ConsultationId = c.ConsultationId,
+                BeardStyleId = c.BeardStyleId,
+                IsSelected = c.IsSelected,
+                CreatedAt = c.CreatedAt
+            })
+            .ToListAsync(cancellationToken);
+    }
 }

@@ -111,4 +111,26 @@ public class ConsultationController : ControllerBase
 
         return Ok(candidate);
     }
+    [HttpGet("/api/consultations/{consultationId:long}/hair-candidates")]
+    public async Task<ActionResult<List<HairCandidateResponse>>> GetAllHairCandidates(
+    long consultationId,
+    CancellationToken cancellationToken)
+    {
+        var candidates = await _hairCandidateService.GetAllAsync(
+            consultationId,
+            cancellationToken);
+
+        return Ok(candidates);
+    }
+    [HttpGet("/api/consultations/{consultationId:long}/beard-candidates")]
+    public async Task<ActionResult<List<BeardCandidateResponse>>> GetAllBeardCandidates(
+    long consultationId,
+    CancellationToken cancellationToken)
+    {
+        var candidates = await _beardCandidateService.GetAllAsync(
+            consultationId,
+            cancellationToken);
+
+        return Ok(candidates);
+    }
 }
