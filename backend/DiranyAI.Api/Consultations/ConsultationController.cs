@@ -133,4 +133,30 @@ public class ConsultationController : ControllerBase
 
         return Ok(candidates);
     }
+    [HttpDelete("/api/consultations/{consultationId:long}/hair-candidates/{candidateId:long}")]
+    public async Task<IActionResult> DeleteHairCandidate(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken)
+    {
+        await _hairCandidateService.DeleteAsync(
+            consultationId,
+            candidateId,
+            cancellationToken);
+
+        return NoContent();
+    }
+    [HttpDelete("/api/consultations/{consultationId:long}/beard-candidates/{candidateId:long}")]
+    public async Task<IActionResult> DeleteBeardCandidate(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken)
+    {
+        await _beardCandidateService.DeleteAsync(
+            consultationId,
+            candidateId,
+            cancellationToken);
+
+        return NoContent();
+    }
 }

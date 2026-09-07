@@ -45,6 +45,16 @@ public class HairCandidateService
         {
             throw new ArgumentException("This hair style has already been added to the consultation.");
         }
+        var candidateCount = await _dbContext.HairCandidates
+        .CountAsync(
+        c => c.ConsultationId == consultationId,
+        cancellationToken);
+
+        if (candidateCount >= 3)
+        {
+            throw new ArgumentException(
+                "A consultation can have a maximum of 3 hair candidates.");
+        }
 
         var candidate = new HairCandidate
         {
@@ -123,5 +133,25 @@ public class HairCandidateService
                 CreatedAt = c.CreatedAt
             })
             .ToListAsync(cancellationToken);
+    }
+    public async Task DeleteAsync(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken = default)
+    {
+        var candidate = await _dbContext.HairCandidates
+            .FirstOrDefaultAsync(
+                c => c.Id == candidateId &&
+                     c.ConsultationId == consultationId,
+                cancellationToken);
+
+        if (candidate is null)
+        {
+            throw new ArgumentException(
+                "The hair candidate does not exist for this consultation.");
+        }
+
+        _dbContext.HairCandidates.Remove(candidate);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

@@ -49,6 +49,16 @@ public class BeardCandidateService
             throw new ArgumentException(
                 "This beard style has already been added to the consultation.");
         }
+        var candidateCount = await _dbContext.BeardCandidates
+        .CountAsync(
+        c => c.ConsultationId == consultationId,
+        cancellationToken);
+
+        if (candidateCount >= 3)
+        {
+            throw new ArgumentException(
+                "A consultation can have a maximum of 3 beard candidates.");
+        }
 
         var candidate = new BeardCandidate
         {
@@ -127,5 +137,25 @@ public class BeardCandidateService
                 CreatedAt = c.CreatedAt
             })
             .ToListAsync(cancellationToken);
+    }
+    public async Task DeleteAsync(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken = default)
+    {
+        var candidate = await _dbContext.BeardCandidates
+            .FirstOrDefaultAsync(
+                c => c.Id == candidateId &&
+                     c.ConsultationId == consultationId,
+                cancellationToken);
+
+        if (candidate is null)
+        {
+            throw new ArgumentException(
+                "The beard candidate does not exist for this consultation.");
+        }
+
+        _dbContext.BeardCandidates.Remove(candidate);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }
