@@ -66,4 +66,45 @@ public class HairCandidateService
             CreatedAt = candidate.CreatedAt
         };
     }
+    public async Task<HairCandidateResponse> SelectHairCandidateAsync(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken = default)
+    {
+        var candidate = await _dbContext.HairCandidates
+            .FirstOrDefaultAsync(
+                c => c.Id == candidateId &&
+                     c.ConsultationId == consultationId,
+                cancellationToken);
+
+        if (candidate is null)
+        {
+            throw new ArgumentException(
+                "The hair candidate does not exist for this consultation.");
+        }
+
+        var selectedCandidates = await _dbContext.HairCandidates
+            .Where(c =>
+                c.ConsultationId == consultationId &&
+                c.IsSelected)
+            .ToListAsync(cancellationToken);
+
+        foreach (var selected in selectedCandidates)
+        {
+            selected.IsSelected = false;
+        }
+
+        candidate.IsSelected = true;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return new HairCandidateResponse
+        {
+            Id = candidate.Id,
+            ConsultationId = candidate.ConsultationId,
+            HairStyleId = candidate.HairStyleId,
+            IsSelected = candidate.IsSelected,
+            CreatedAt = candidate.CreatedAt
+        };
+    }
 }

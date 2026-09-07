@@ -85,4 +85,30 @@ public class ConsultationController : ControllerBase
 
         return Ok(candidate);
     }
+    [HttpPut("/api/consultations/{consultationId:long}/hair-candidates/{candidateId:long}/selection")]
+    public async Task<ActionResult<HairCandidateResponse>> SelectHairCandidate(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken)
+    {
+        var candidate = await _hairCandidateService.SelectHairCandidateAsync(
+            consultationId,
+            candidateId,
+            cancellationToken);
+
+        return Ok(candidate);
+    }
+    [HttpPut("/api/consultations/{consultationId:long}/beard-candidates/{candidateId:long}/selection")]
+    public async Task<ActionResult<BeardCandidateResponse>> SelectBeardCandidate(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken)
+    {
+        var candidate = await _beardCandidateService.SelectBeardCandidateAsync(
+            consultationId,
+            candidateId,
+            cancellationToken);
+
+        return Ok(candidate);
+    }
 }

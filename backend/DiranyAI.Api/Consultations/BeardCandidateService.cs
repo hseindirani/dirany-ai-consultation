@@ -70,4 +70,45 @@ public class BeardCandidateService
             CreatedAt = candidate.CreatedAt
         };
     }
+    public async Task<BeardCandidateResponse> SelectBeardCandidateAsync(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken = default)
+    {
+        var candidate = await _dbContext.BeardCandidates
+            .FirstOrDefaultAsync(
+                c => c.Id == candidateId &&
+                     c.ConsultationId == consultationId,
+                cancellationToken);
+
+        if (candidate is null)
+        {
+            throw new ArgumentException(
+                "The beard candidate does not exist for this consultation.");
+        }
+
+        var selectedCandidates = await _dbContext.BeardCandidates
+            .Where(c =>
+                c.ConsultationId == consultationId &&
+                c.IsSelected)
+            .ToListAsync(cancellationToken);
+
+        foreach (var selected in selectedCandidates)
+        {
+            selected.IsSelected = false;
+        }
+
+        candidate.IsSelected = true;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return new BeardCandidateResponse
+        {
+            Id = candidate.Id,
+            ConsultationId = candidate.ConsultationId,
+            BeardStyleId = candidate.BeardStyleId,
+            IsSelected = candidate.IsSelected,
+            CreatedAt = candidate.CreatedAt
+        };
+    }
 }
