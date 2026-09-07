@@ -20,4 +20,9 @@ public class Consultation
 
     public ICollection<ConsultationImage> Images { get; set; }
     = new List<ConsultationImage>();
+    public ICollection<HairCandidate> HairCandidates { get; set; }
+    = new List<HairCandidate>();
+
+    public ICollection<BeardCandidate> BeardCandidates { get; set; }
+        = new List<BeardCandidate>();
 }

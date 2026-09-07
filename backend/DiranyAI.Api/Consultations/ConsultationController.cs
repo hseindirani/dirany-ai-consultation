@@ -9,13 +9,19 @@ public class ConsultationController : ControllerBase
 {
     private readonly ConsultationService _consultationService;
     private readonly ConsultationImageService _consultationImageService;
+    private readonly HairCandidateService _hairCandidateService;
+    private readonly BeardCandidateService _beardCandidateService;
 
     public ConsultationController(
         ConsultationService consultationService,
-        ConsultationImageService consultationImageService)
+        ConsultationImageService consultationImageService,
+        HairCandidateService hairCandidateService,
+        BeardCandidateService beardCandidateService)
     {
         _consultationService = consultationService;
         _consultationImageService = consultationImageService;
+        _hairCandidateService = hairCandidateService;
+        _beardCandidateService = beardCandidateService;
     }
 
     [HttpPost]
@@ -52,5 +58,31 @@ public class ConsultationController : ControllerBase
             cancellationToken);
 
         return Ok(image);
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/hair-candidates")]
+    public async Task<ActionResult<HairCandidateResponse>> AddHairCandidate(
+    long consultationId,
+    AddHairCandidateRequest request,
+    CancellationToken cancellationToken)
+    {
+        var candidate = await _hairCandidateService.AddHairCandidateAsync(
+            consultationId,
+            request,
+            cancellationToken);
+
+        return Ok(candidate);
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/beard-candidates")]
+    public async Task<ActionResult<BeardCandidateResponse>> AddBeardCandidate(
+    long consultationId,
+    AddBeardCandidateRequest request,
+    CancellationToken cancellationToken)
+    {
+        var candidate = await _beardCandidateService.AddBeardCandidateAsync(
+            consultationId,
+            request,
+            cancellationToken);
+
+        return Ok(candidate);
     }
 }

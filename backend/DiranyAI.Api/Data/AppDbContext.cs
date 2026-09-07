@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
     public DbSet<ConsultationImage> ConsultationImages { get; set; }
     public DbSet<HairStyle> HairStyles { get; set; }
     public DbSet<BeardStyle> BeardStyles { get; set; }
+    public DbSet<HairCandidate> HairCandidates { get; set; }
+    public DbSet<BeardCandidate> BeardCandidates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

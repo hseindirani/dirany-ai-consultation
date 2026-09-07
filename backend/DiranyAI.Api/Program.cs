@@ -20,6 +20,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<ConsultationService>();
 builder.Services.AddScoped<ConsultationImageService>();
+builder.Services.AddScoped<HairCandidateService>();
+builder.Services.AddScoped<BeardCandidateService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IImageStorage, LocalImageStorage>();

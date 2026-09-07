@@ -1,4 +1,6 @@
-﻿namespace DiranyAI.Api.Styles;
+﻿using DiranyAI.Api.Consultations;
+
+namespace DiranyAI.Api.Styles;
 
 public class HairStyle
 {
@@ -11,4 +13,6 @@ public class HairStyle
     public string AiPromptHint { get; set; } = string.Empty;
 
     public bool IsActive { get; set; }
+    public ICollection<HairCandidate> HairCandidates { get; set; }
+    = new List<HairCandidate>();
 }
