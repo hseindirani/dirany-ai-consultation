@@ -1,63 +1,379 @@
 @if (consultation() && customer()) {
-  <main class="workspace">
+<main class="workspace">
+
     <header class="customer-header">
-      <span class="status">In Progress</span>
+        <div>
+            <span class="status">Consultation in progress</span>
 
-      <h1>
-        {{ customer().firstName }}
-        {{ customer().lastName }}
-      </h1>
+            <h1>
+                {{ customer().firstName }}
+                {{ customer().lastName }}
+            </h1>
 
-      <p>{{ customer().phoneNumber }}</p>
+            <p>{{ customer().phoneNumber }}</p>
+        </div>
+
+        <div class="consultation-mark">
+            <span>Consultation</span>
+            <strong>#{{ consultation().id }}</strong>
+        </div>
     </header>
 
+    <!-- STEP 1 -->
     <section class="photo-section">
-      <div class="section-heading">
-        <span class="eyebrow">Step 1</span>
-        <h2>Current photo</h2>
-        <p>Choose a clear photo to use throughout the consultation.</p>
-      </div>
+        <div class="section-number">01</div>
 
-      @if (previewUrl) {
-        <div class="photo-preview">
-          <img [src]="previewUrl" alt="Selected customer photo" />
+        <div class="photo-content">
+            <div class="section-heading">
+                <span class="eyebrow">Current look</span>
+                <h2>Start with the client.</h2>
+
+                <p>
+                    Use a clear current photo as the reference for the consultation.
+                </p>
+            </div>
+
+            <div class="photo-actions">
+                <label class="file-button">
+                    Choose photo
+
+                    <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+                </label>
+
+                @if (selectedFileName()) {
+                <span class="file-name">
+                    {{ selectedFileName() }}
+                </span>
+                }
+
+                <button class="upload-button" type="button" [disabled]="!selectedFile() || isUploading()"
+                    (click)="uploadPhoto()">
+                    {{ isUploading() ? 'Uploading...' : 'Upload photo' }}
+                </button>
+
+                @if (uploadSuccess()) {
+                <span class="upload-success">
+                    ✓ Photo ready
+                </span>
+                }
+            </div>
         </div>
-      }
 
-      <div class="photo-actions">
-        <label class="file-button">
-          Choose photo
-
-          <input
-            type="file"
-            accept="image/*"
-            (change)="onFileSelected($event)"
-          />
-        </label>
-
-        @if (selectedFileName()) {
-          <span class="file-name">
-            {{ selectedFileName() }}
-          </span>
-        }
-
-        <button
-          class="upload-button"
-          type="button"
-          [disabled]="!selectedFile() || isUploading()"
-          (click)="uploadPhoto()"
-        >
-          {{ isUploading() ? 'Uploading...' : 'Upload photo' }}
-        </button>
-
-        @if (uploadSuccess()) {
-          <p class="upload-success">
-            Photo uploaded successfully.
-          </p>
-        }
-      </div>
+        <div class="photo-visual">
+            @if (previewUrl) {
+            <img [src]="previewUrl" alt="Selected customer photo" />
+            } @else {
+            <div class="photo-placeholder">
+                <span>PHOTO</span>
+                <p>Client reference</p>
+            </div>
+            }
+        </div>
     </section>
-  </main>
+
+    <!-- STEP 2 -->
+    <section class="hair-section">
+        <div class="section-intro">
+            <div>
+                <span class="eyebrow">02 / Hair direction</span>
+                <h2>Explore the possibilities.</h2>
+            </div>
+
+            <p>
+                Browse one style at a time. Keep up to three directions worth
+                considering, then choose the strongest one.
+            </p>
+        </div>
+
+        <div class="hair-experience">
+
+            <!-- STYLE SPOTLIGHT -->
+            <div class="style-stage">
+                @if (currentHairStyle(); as style) {
+                <div class="style-counter">
+                    <span>
+                        {{ hairStyleIndex() + 1 }}
+                    </span>
+
+                    <span class="counter-line"></span>
+
+                    <span>
+                        {{ hairStyles().length }}
+                    </span>
+                </div>
+
+                <div class="style-index">
+                    0{{ hairStyleIndex() + 1 }}
+                </div>
+
+                <div class="style-stage-content">
+                    <span class="style-label">Hair style</span>
+
+                    <h3>{{ style.name }}</h3>
+
+                    <p>{{ style.description }}</p>
+
+                    <div class="stage-actions">
+                        @if (getHairCandidate(style.id); as candidate) {
+                        <div class="already-shortlisted">
+                            <span>✓ In shortlist</span>
+
+                            @if (candidate.isSelected) {
+                            <strong>Final choice</strong>
+                            }
+                        </div>
+                        } @else if (hairCandidates().length >= maxHairCandidates) {
+                        <button class="primary-style-button" type="button" disabled>
+                            Shortlist full
+                        </button>
+                        } @else {
+                        <button class="primary-style-button" type="button" (click)="addHairCandidate(style.id)">
+                            Add to shortlist
+                        </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="style-navigation">
+                    <button type="button" class="nav-button" (click)="previousHairStyle()"
+                        aria-label="Previous hairstyle">
+                        ←
+                    </button>
+
+                    <span>Browse styles</span>
+
+                    <button type="button" class="nav-button" (click)="nextHairStyle()" aria-label="Next hairstyle">
+                        →
+                    </button>
+                </div>
+                }
+            </div>
+
+            <!-- SHORTLIST -->
+            <aside class="shortlist-panel">
+                <div class="shortlist-header">
+                    <div>
+                        <span class="eyebrow">Shortlist</span>
+                        <h3>Your directions</h3>
+                    </div>
+
+                    <span class="shortlist-count">
+                        {{ hairCandidates().length }} / {{ maxHairCandidates }}
+                    </span>
+                </div>
+
+                @if (hairCandidates().length === 0) {
+                <div class="empty-shortlist">
+                    <span>Nothing shortlisted yet.</span>
+
+                    <p>
+                        Explore the styles and keep the ones worth comparing.
+                    </p>
+                </div>
+                } @else {
+                <div class="shortlist-items">
+                    @for (candidate of hairCandidates(); track candidate.id) {
+                    @if (getHairStyleById(candidate.hairStyleId); as style) {
+                    <article class="shortlist-item" [class.final-choice]="candidate.isSelected">
+                        <div class="shortlist-item-top">
+                            <span class="shortlist-number">
+                                0{{ $index + 1 }}
+                            </span>
+
+                            @if (candidate.isSelected) {
+                            <span class="final-badge">
+                                Final choice
+                            </span>
+                            }
+                        </div>
+
+                        <h4>{{ style.name }}</h4>
+
+                        <p>{{ style.description }}</p>
+
+                        <div class="shortlist-actions">
+                            @if (!candidate.isSelected) {
+                            <button type="button" class="select-button" (click)="selectHairCandidate(candidate.id)">
+                                Choose this style
+                            </button>
+                            } @else {
+                            <span class="selected-label">
+                                ✓ Selected
+                            </span>
+                            }
+
+                            <button type="button" class="remove-button" (click)="removeHairCandidate(candidate.id)">
+                                Remove
+                            </button>
+                        </div>
+                    </article>
+                    }
+                    }
+                </div>
+                }
+
+                @if (hairCandidates().length >= maxHairCandidates) {
+                <p class="limit-message">
+                    Your shortlist is full. Remove one to explore another direction.
+                </p>
+                }
+            </aside>
+        </div>
+    </section>
+    <!-- STEP 3 -->
+    <section class="beard-section">
+        <div class="section-intro">
+            <div>
+                <span class="eyebrow">03 / Beard direction</span>
+                <h2>Shape the complete look.</h2>
+            </div>
+
+            <p>
+                Explore beard styles one at a time. Keep up to three directions,
+                then choose the one that best completes the look.
+            </p>
+        </div>
+
+        <div class="beard-experience">
+
+            <!-- BEARD SHORTLIST -->
+            <aside class="shortlist-panel">
+                <div class="shortlist-header">
+                    <div>
+                        <span class="eyebrow">Shortlist</span>
+                        <h3>Your directions</h3>
+                    </div>
+
+                    <span class="shortlist-count">
+                        {{ beardCandidates().length }} / {{ maxBeardCandidates }}
+                    </span>
+                </div>
+
+                @if (beardCandidates().length === 0) {
+                <div class="empty-shortlist">
+                    <span>Nothing shortlisted yet.</span>
+
+                    <p>
+                        Explore the beard styles and keep the ones worth comparing.
+                    </p>
+                </div>
+                } @else {
+                <div class="shortlist-items">
+                    @for (candidate of beardCandidates(); track candidate.id) {
+                    @if (getBeardStyleById(candidate.beardStyleId); as style) {
+                    <article class="shortlist-item" [class.final-choice]="candidate.isSelected">
+                        <div class="shortlist-item-top">
+                            <span class="shortlist-number">
+                                0{{ $index + 1 }}
+                            </span>
+
+                            @if (candidate.isSelected) {
+                            <span class="final-badge">
+                                Final choice
+                            </span>
+                            }
+                        </div>
+
+                        <h4>{{ style.name }}</h4>
+
+                        <p>{{ style.description }}</p>
+
+                        <div class="shortlist-actions">
+                            @if (!candidate.isSelected) {
+                            <button type="button" class="select-button" (click)="selectBeardCandidate(candidate.id)">
+                                Choose this style
+                            </button>
+                            } @else {
+                            <span class="selected-label">
+                                ✓ Selected
+                            </span>
+                            }
+
+                            <button type="button" class="remove-button" (click)="removeBeardCandidate(candidate.id)">
+                                Remove
+                            </button>
+                        </div>
+                    </article>
+                    }
+                    }
+                </div>
+                }
+
+                @if (beardCandidates().length >= maxBeardCandidates) {
+                <p class="limit-message">
+                    Your shortlist is full. Remove one to explore another direction.
+                </p>
+                }
+            </aside>
+
+            <!-- BEARD STYLE SPOTLIGHT -->
+            <div class="style-stage beard-stage">
+                @if (currentBeardStyle(); as style) {
+                <div class="style-counter">
+                    <span>
+                        {{ beardStyleIndex() + 1 }}
+                    </span>
+
+                    <span class="counter-line"></span>
+
+                    <span>
+                        {{ beardStyles().length }}
+                    </span>
+                </div>
+
+                <div class="style-index">
+                    0{{ beardStyleIndex() + 1 }}
+                </div>
+
+                <div class="style-stage-content">
+                    <span class="style-label">Beard style</span>
+
+                    <h3>{{ style.name }}</h3>
+
+                    <p>{{ style.description }}</p>
+
+                    <div class="stage-actions">
+                        @if (getBeardCandidate(style.id); as candidate) {
+                        <div class="already-shortlisted">
+                            <span>✓ In shortlist</span>
+
+                            @if (candidate.isSelected) {
+                            <strong>Final choice</strong>
+                            }
+                        </div>
+                        } @else if (beardCandidates().length >= maxBeardCandidates) {
+                        <button class="primary-style-button" type="button" disabled>
+                            Shortlist full
+                        </button>
+                        } @else {
+                        <button class="primary-style-button" type="button" (click)="addBeardCandidate(style.id)">
+                            Add to shortlist
+                        </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="style-navigation">
+                    <button type="button" class="nav-button" (click)="previousBeardStyle()"
+                        aria-label="Previous beard style">
+                        ←
+                    </button>
+
+                    <span>Browse beard styles</span>
+
+                    <button type="button" class="nav-button" (click)="nextBeardStyle()" aria-label="Next beard style">
+                        →
+                    </button>
+                </div>
+                }
+            </div>
+
+        </div>
+    </section>
+
+</main>
 } @else {
-  <p>Loading consultation...</p>
+<div class="loading-state">
+    Loading consultation...
+</div>
 }
