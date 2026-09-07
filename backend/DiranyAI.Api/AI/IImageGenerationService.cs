@@ -1,6 +1,9 @@
-﻿namespace DiranyAI.Api.AI
+﻿namespace DiranyAI.Api.AI;
+
+public interface IImageGenerationService
 {
-    public class IImageGenerationService
-    {
-    }
+    Task<Stream> GenerateHairPreviewAsync(
+        Stream originalImage,
+        string prompt,
+        CancellationToken cancellationToken = default);
 }
