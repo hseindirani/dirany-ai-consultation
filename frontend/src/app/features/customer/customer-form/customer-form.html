@@ -1,0 +1,32 @@
+<div class="customer-page">
+    <div class="customer-container">
+        <a routerLink="/" class="back-link">← Back</a>
+
+        <div class="form-heading">
+            <span class="eyebrow">New Consultation</span>
+            <h1>Customer details</h1>
+            <p>Enter the customer's details to begin the consultation.</p>
+        </div>
+
+        <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+            <div class="form-field">
+                <label for="firstName">First name</label>
+                <input id="firstName" type="text" formControlName="firstName" />
+            </div>
+
+            <div class="form-field">
+                <label for="lastName">Last name</label>
+                <input id="lastName" type="text" formControlName="lastName" />
+            </div>
+
+            <div class="form-field">
+                <label for="phoneNumber">Phone number</label>
+                <input id="phoneNumber" type="tel" formControlName="phoneNumber" />
+            </div>
+
+            <button type="submit" [disabled]="isSubmitting">
+                {{ isSubmitting ? 'Starting...' : 'Continue' }}
+            </button>
+        </form>
+    </div>
+</div>
