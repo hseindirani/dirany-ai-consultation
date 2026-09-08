@@ -375,4 +375,27 @@ export class ConsultationWorkspace implements OnInit {
         },
       });
   }
+  getHairStyleImage(styleName: string): string {
+  const images: Record<string, string> = {
+    'Taper Fade': '/images/styles/hair/taper-fade.png',
+    'Buzz Cut': '/images/styles/hair/buzz-cut.png',
+    'Mohawk': '/images/styles/hair/mohawk.png',
+    'Textured Crop': '/images/styles/hair/textured-crop.png',
+    'Slick Back': '/images/styles/hair/slick-back.png',
+  };
+
+  return images[styleName] ?? '';
+}
+
+getBeardStyleImage(styleName: string): string {
+  const images: Record<string, string> = {
+    'Short Boxed Beard': '/images/styles/beard/short-boxed-beard.png',
+    'Pointy Beard': '/images/styles/beard/pointy-beard.png',
+    'Italian Beard': '/images/styles/beard/italian-beard.png',
+    'Stubble': '/images/styles/beard/stubble.png',
+    'Full Beard': '/images/styles/beard/full-beard.png',
+  };
+
+  return images[styleName] ?? '';
+}
 }

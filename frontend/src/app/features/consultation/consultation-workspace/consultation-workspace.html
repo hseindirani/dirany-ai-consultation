@@ -90,6 +90,9 @@
             <!-- STYLE SPOTLIGHT -->
             <div class="style-stage">
                 @if (currentHairStyle(); as style) {
+                <div class="style-reference-image">
+                    <img [src]="getHairStyleImage(style.name)" [alt]="style.name + ' reference'" />
+                </div>
                 <div class="style-counter">
                     <span>
                         {{ hairStyleIndex() + 1 }}
@@ -102,9 +105,6 @@
                     </span>
                 </div>
 
-                <div class="style-index">
-                    0{{ hairStyleIndex() + 1 }}
-                </div>
 
                 <div class="style-stage-content">
                     <span class="style-label">Hair style</span>
@@ -175,36 +175,42 @@
                     @for (candidate of hairCandidates(); track candidate.id) {
                     @if (getHairStyleById(candidate.hairStyleId); as style) {
                     <article class="shortlist-item" [class.final-choice]="candidate.isSelected">
-                        <div class="shortlist-item-top">
-                            <span class="shortlist-number">
-                                0{{ $index + 1 }}
-                            </span>
-
-                            @if (candidate.isSelected) {
-                            <span class="final-badge">
-                                Final choice
-                            </span>
-                            }
+                        <div class="shortlist-thumbnail">
+                            <img [src]="getHairStyleImage(style.name)" [alt]="style.name + ' reference'" />
                         </div>
 
-                        <h4>{{ style.name }}</h4>
+                        <div class="shortlist-item-content">
+                            <div class="shortlist-item-top">
+                                <span class="shortlist-number">
+                                    0{{ $index + 1 }}
+                                </span>
 
-                        <p>{{ style.description }}</p>
+                                @if (candidate.isSelected) {
+                                <span class="final-badge">
+                                    Final choice
+                                </span>
+                                }
+                            </div>
 
-                        <div class="shortlist-actions">
-                            @if (!candidate.isSelected) {
-                            <button type="button" class="select-button" (click)="selectHairCandidate(candidate.id)">
-                                Choose this style
-                            </button>
-                            } @else {
-                            <span class="selected-label">
-                                ✓ Selected
-                            </span>
-                            }
+                            <h4>{{ style.name }}</h4>
 
-                            <button type="button" class="remove-button" (click)="removeHairCandidate(candidate.id)">
-                                Remove
-                            </button>
+                            <p>{{ style.description }}</p>
+
+                            <div class="shortlist-actions">
+                                @if (!candidate.isSelected) {
+                                <button type="button" class="select-button" (click)="selectHairCandidate(candidate.id)">
+                                    Choose this style
+                                </button>
+                                } @else {
+                                <span class="selected-label">
+                                    ✓ Selected
+                                </span>
+                                }
+
+                                <button type="button" class="remove-button" (click)="removeHairCandidate(candidate.id)">
+                                    Remove
+                                </button>
+                            </div>
                         </div>
                     </article>
                     }
@@ -262,36 +268,44 @@
                     @for (candidate of beardCandidates(); track candidate.id) {
                     @if (getBeardStyleById(candidate.beardStyleId); as style) {
                     <article class="shortlist-item" [class.final-choice]="candidate.isSelected">
-                        <div class="shortlist-item-top">
-                            <span class="shortlist-number">
-                                0{{ $index + 1 }}
-                            </span>
-
-                            @if (candidate.isSelected) {
-                            <span class="final-badge">
-                                Final choice
-                            </span>
-                            }
+                        <div class="shortlist-thumbnail beard-shortlist-thumbnail">
+                            <img [src]="getBeardStyleImage(style.name)" [alt]="style.name + ' reference'" />
                         </div>
 
-                        <h4>{{ style.name }}</h4>
+                        <div class="shortlist-item-content">
+                            <div class="shortlist-item-top">
+                                <span class="shortlist-number">
+                                    0{{ $index + 1 }}
+                                </span>
 
-                        <p>{{ style.description }}</p>
+                                @if (candidate.isSelected) {
+                                <span class="final-badge">
+                                    Final choice
+                                </span>
+                                }
+                            </div>
 
-                        <div class="shortlist-actions">
-                            @if (!candidate.isSelected) {
-                            <button type="button" class="select-button" (click)="selectBeardCandidate(candidate.id)">
-                                Choose this style
-                            </button>
-                            } @else {
-                            <span class="selected-label">
-                                ✓ Selected
-                            </span>
-                            }
+                            <h4>{{ style.name }}</h4>
 
-                            <button type="button" class="remove-button" (click)="removeBeardCandidate(candidate.id)">
-                                Remove
-                            </button>
+                            <p>{{ style.description }}</p>
+
+                            <div class="shortlist-actions">
+                                @if (!candidate.isSelected) {
+                                <button type="button" class="select-button"
+                                    (click)="selectBeardCandidate(candidate.id)">
+                                    Choose this style
+                                </button>
+                                } @else {
+                                <span class="selected-label">
+                                    ✓ Selected
+                                </span>
+                                }
+
+                                <button type="button" class="remove-button"
+                                    (click)="removeBeardCandidate(candidate.id)">
+                                    Remove
+                                </button>
+                            </div>
                         </div>
                     </article>
                     }
@@ -309,6 +323,9 @@
             <!-- BEARD STYLE SPOTLIGHT -->
             <div class="style-stage beard-stage">
                 @if (currentBeardStyle(); as style) {
+                <div class="style-reference-image beard-reference-image">
+                    <img [src]="getBeardStyleImage(style.name)" [alt]="style.name + ' reference'" />
+                </div>
                 <div class="style-counter">
                     <span>
                         {{ beardStyleIndex() + 1 }}
@@ -321,9 +338,6 @@
                     </span>
                 </div>
 
-                <div class="style-index">
-                    0{{ beardStyleIndex() + 1 }}
-                </div>
 
                 <div class="style-stage-content">
                     <span class="style-label">Beard style</span>
