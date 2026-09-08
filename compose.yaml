@@ -1,0 +1,18 @@
+services:
+  backend:
+    build:
+      context: ./backend/DiranyAI.Api
+    container_name: diranyai-api-container
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: diranyai-frontend-container
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
