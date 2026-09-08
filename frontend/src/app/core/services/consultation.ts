@@ -1,5 +1,6 @@
 import { Service, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { environment } from "../../../environments/environment";
 
 export interface HairCandidate {
   id: number;
@@ -8,6 +9,7 @@ export interface HairCandidate {
   isSelected: boolean;
   createdAt: string;
 }
+
 export interface BeardCandidate {
   id: number;
   consultationId: number;
@@ -19,16 +21,17 @@ export interface BeardCandidate {
 @Service()
 export class Consultation {
   private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
 
   createConsultation(customerId: number) {
     return this.http.post(
-      `http://localhost:5091/api/customers/${customerId}/consultations`,
+      `${this.apiUrl}/customers/${customerId}/consultations`,
       {},
     );
   }
 
   getConsultation(id: number) {
-    return this.http.get(`http://localhost:5091/api/consultations/${id}`);
+    return this.http.get(`${this.apiUrl}/consultations/${id}`);
   }
 
   uploadOriginalImage(consultationId: number, file: File) {
@@ -36,14 +39,14 @@ export class Consultation {
     formData.append("file", file);
 
     return this.http.post(
-      `http://localhost:5091/api/consultations/${consultationId}/images/original`,
+      `${this.apiUrl}/consultations/${consultationId}/images/original`,
       formData,
     );
   }
 
   addHairCandidate(consultationId: number, hairStyleId: number) {
     return this.http.post<HairCandidate>(
-      `http://localhost:5091/api/consultations/${consultationId}/hair-candidates`,
+      `${this.apiUrl}/consultations/${consultationId}/hair-candidates`,
       {
         hairStyleId,
       },
@@ -52,43 +55,48 @@ export class Consultation {
 
   getHairCandidates(consultationId: number) {
     return this.http.get<HairCandidate[]>(
-      `http://localhost:5091/api/consultations/${consultationId}/hair-candidates`,
+      `${this.apiUrl}/consultations/${consultationId}/hair-candidates`,
     );
   }
+
   selectHairCandidate(consultationId: number, candidateId: number) {
     return this.http.put<HairCandidate>(
-      `http://localhost:5091/api/consultations/${consultationId}/hair-candidates/${candidateId}/selection`,
+      `${this.apiUrl}/consultations/${consultationId}/hair-candidates/${candidateId}/selection`,
       {},
     );
   }
+
   removeHairCandidate(consultationId: number, candidateId: number) {
     return this.http.delete<void>(
-      `http://localhost:5091/api/consultations/${consultationId}/hair-candidates/${candidateId}`,
+      `${this.apiUrl}/consultations/${consultationId}/hair-candidates/${candidateId}`,
     );
   }
+
   addBeardCandidate(consultationId: number, beardStyleId: number) {
     return this.http.post<BeardCandidate>(
-      `http://localhost:5091/api/consultations/${consultationId}/beard-candidates`,
-      { beardStyleId },
+      `${this.apiUrl}/consultations/${consultationId}/beard-candidates`,
+      {
+        beardStyleId,
+      },
     );
   }
 
   getBeardCandidates(consultationId: number) {
     return this.http.get<BeardCandidate[]>(
-      `http://localhost:5091/api/consultations/${consultationId}/beard-candidates`,
+      `${this.apiUrl}/consultations/${consultationId}/beard-candidates`,
     );
   }
 
   selectBeardCandidate(consultationId: number, candidateId: number) {
     return this.http.put<BeardCandidate>(
-      `http://localhost:5091/api/consultations/${consultationId}/beard-candidates/${candidateId}/selection`,
+      `${this.apiUrl}/consultations/${consultationId}/beard-candidates/${candidateId}/selection`,
       {},
     );
   }
 
   removeBeardCandidate(consultationId: number, candidateId: number) {
     return this.http.delete<void>(
-      `http://localhost:5091/api/consultations/${consultationId}/beard-candidates/${candidateId}`,
+      `${this.apiUrl}/consultations/${consultationId}/beard-candidates/${candidateId}`,
     );
   }
 }

@@ -1,11 +1,12 @@
 import { Service, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Service()
 export class Customer {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:5091/api/customers';
+  private readonly apiUrl = `${environment.apiUrl}/customers`;
 
   createCustomer(customer: {
     firstName: string;
