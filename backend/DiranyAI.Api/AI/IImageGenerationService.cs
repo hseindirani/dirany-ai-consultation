@@ -3,7 +3,7 @@
 public interface IImageGenerationService
 {
     Task<Stream> GenerateHairPreviewAsync(
-        Stream originalImage,
+        ImageInput originalImage,
         string prompt,
         CancellationToken cancellationToken = default);
 }

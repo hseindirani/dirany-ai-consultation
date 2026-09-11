@@ -11,17 +11,20 @@ public class ConsultationController : ControllerBase
     private readonly ConsultationImageService _consultationImageService;
     private readonly HairCandidateService _hairCandidateService;
     private readonly BeardCandidateService _beardCandidateService;
+    private readonly HairPreviewService _hairPreviewService;
 
     public ConsultationController(
         ConsultationService consultationService,
         ConsultationImageService consultationImageService,
         HairCandidateService hairCandidateService,
-        BeardCandidateService beardCandidateService)
+        BeardCandidateService beardCandidateService,
+        HairPreviewService hairPreviewService)
     {
         _consultationService = consultationService;
         _consultationImageService = consultationImageService;
         _hairCandidateService = hairCandidateService;
         _beardCandidateService = beardCandidateService;
+        _hairPreviewService = hairPreviewService;
     }
 
     [HttpPost]
@@ -158,5 +161,43 @@ public class ConsultationController : ControllerBase
             cancellationToken);
 
         return NoContent();
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/hair-candidates/{candidateId:long}/preview")]
+    public async Task<ActionResult<HairPreviewResponse>> GenerateHairPreview(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken)
+    {
+        var result = await _hairPreviewService.GenerateAsync(
+            consultationId,
+            candidateId,
+            cancellationToken);
+
+        return Ok(result);
+    }
+    [HttpGet("/api/consultations/{consultationId:long}/images/{imageId:long}")]
+    public async Task<IActionResult> GetImage(
+    long consultationId,
+    long imageId,
+    CancellationToken cancellationToken)
+    {
+        var (stream, contentType) =
+            await _consultationImageService.GetImageAsync(
+                consultationId,
+                imageId,
+                cancellationToken);
+
+        return File(stream, contentType);
+    }
+    [HttpGet("/api/consultations/{consultationId:long}/images")]
+    public async Task<ActionResult<List<ConsultationImageResponse>>> GetImages(
+    long consultationId,
+    CancellationToken cancellationToken)
+    {
+        var images = await _consultationImageService.GetImagesAsync(
+            consultationId,
+            cancellationToken);
+
+        return Ok(images);
     }
 }

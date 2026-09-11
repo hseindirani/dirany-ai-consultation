@@ -74,8 +74,56 @@ public class ConsultationImageService
             Id = image.Id,
             ConsultationId = image.ConsultationId,
             ImageType = image.ImageType,
-            StoragePath = image.StoragePath,
+            
             CreatedAt = image.CreatedAt
         };
+    }
+    public async Task<(Stream Stream, string ContentType)> GetImageAsync(
+    long consultationId,
+    long imageId,
+    CancellationToken cancellationToken = default)
+    {
+        var image = await _dbContext.ConsultationImages
+            .FirstOrDefaultAsync(
+                i => i.Id == imageId &&
+                     i.ConsultationId == consultationId,
+                cancellationToken);
+
+        if (image is null)
+        {
+            throw new KeyNotFoundException("The consultation image does not exist.");
+        }
+
+        var stream = await _imageStorage.OpenReadAsync(
+            image.StoragePath,
+            cancellationToken);
+
+        var contentType = Path.GetExtension(image.StoragePath).ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            _ => "application/octet-stream"
+        };
+
+        return (stream, contentType);
+    }
+    public async Task<List<ConsultationImageResponse>> GetImagesAsync(
+    long consultationId,
+    CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.ConsultationImages
+            .Where(i => i.ConsultationId == consultationId)
+            .OrderBy(i => i.CreatedAt)
+            .Select(i => new ConsultationImageResponse
+            {
+                Id = i.Id,
+                ConsultationId = i.ConsultationId,
+                HairCandidateId = i.HairCandidateId,
+                ImageType = i.ImageType,
+               
+                CreatedAt = i.CreatedAt
+            })
+            .ToListAsync(cancellationToken);
     }
 }

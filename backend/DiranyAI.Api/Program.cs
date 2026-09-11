@@ -1,3 +1,4 @@
+using DiranyAI.Api.AI;
 using DiranyAI.Api.Common.Middleware;
 using DiranyAI.Api.Consultations;
 using DiranyAI.Api.Customers;
@@ -17,11 +18,17 @@ builder.Services
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.Configure<AzureOpenAIOptions>(
+    builder.Configuration.GetSection(AzureOpenAIOptions.SectionName));
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<ConsultationService>();
 builder.Services.AddScoped<ConsultationImageService>();
 builder.Services.AddScoped<HairCandidateService>();
 builder.Services.AddScoped<BeardCandidateService>();
+builder.Services.AddHttpClient<
+    IImageGenerationService,
+    AzureImageGenerationService>();
+builder.Services.AddScoped<HairPreviewService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IImageStorage, LocalImageStorage>();
