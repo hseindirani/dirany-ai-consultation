@@ -93,18 +93,12 @@
                 <div class="style-reference-image">
                     <img [src]="getHairStyleImage(style.name)" [alt]="style.name + ' reference'" />
                 </div>
+
                 <div class="style-counter">
-                    <span>
-                        {{ hairStyleIndex() + 1 }}
-                    </span>
-
+                    <span>{{ hairStyleIndex() + 1 }}</span>
                     <span class="counter-line"></span>
-
-                    <span>
-                        {{ hairStyles().length }}
-                    </span>
+                    <span>{{ hairStyles().length }}</span>
                 </div>
-
 
                 <div class="style-stage-content">
                     <span class="style-label">Hair style</span>
@@ -149,7 +143,7 @@
                 }
             </div>
 
-            <!-- SHORTLIST -->
+            <!-- HAIR SHORTLIST -->
             <aside class="shortlist-panel">
                 <div class="shortlist-header">
                     <div>
@@ -226,6 +220,7 @@
             </aside>
         </div>
     </section>
+
     <!-- STEP 3 -->
     <section class="beard-section">
         <div class="section-intro">
@@ -326,18 +321,12 @@
                 <div class="style-reference-image beard-reference-image">
                     <img [src]="getBeardStyleImage(style.name)" [alt]="style.name + ' reference'" />
                 </div>
+
                 <div class="style-counter">
-                    <span>
-                        {{ beardStyleIndex() + 1 }}
-                    </span>
-
+                    <span>{{ beardStyleIndex() + 1 }}</span>
                     <span class="counter-line"></span>
-
-                    <span>
-                        {{ beardStyles().length }}
-                    </span>
+                    <span>{{ beardStyles().length }}</span>
                 </div>
-
 
                 <div class="style-stage-content">
                     <span class="style-label">Beard style</span>
@@ -383,6 +372,161 @@
             </div>
 
         </div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section class="ai-preview-section">
+        <div class="section-intro">
+            <div>
+                <span class="eyebrow">04 / AI Preview</span>
+                <h2>See the direction come to life.</h2>
+            </div>
+
+            <p>
+                Preview the selected haircut on the client before making the final decision.
+            </p>
+        </div>
+
+        @if (getSelectedHairCandidate(); as selectedCandidate) {
+        @if (getSelectedHairStyle(); as selectedStyle) {
+
+        <div class="ai-preview-selection">
+            <span class="preview-selection-label">Selected haircut</span>
+
+            <div class="preview-selection-style">
+                <div class="preview-style-thumbnail">
+                    <img [src]="getHairStyleImage(selectedStyle.name)" [alt]="selectedStyle.name + ' reference'" />
+                </div>
+
+                <div>
+                    <span>Final hair direction</span>
+                    <strong>{{ selectedStyle.name }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-preview-comparison">
+
+            <!-- ORIGINAL -->
+            <article class="preview-frame">
+                <div class="preview-frame-header">
+                    <div>
+                        <span class="preview-kicker">Reference</span>
+                        <h3>Original</h3>
+                    </div>
+
+                    <span class="preview-status">Current look</span>
+                </div>
+
+                <div class="preview-image">
+                    @if (previewUrl) {
+                    <img [src]="previewUrl" alt="Original customer photo" />
+                    } @else {
+                    <div class="preview-empty">
+                        <span>Original photo required</span>
+                        <p>
+                            Upload a client photo in Step 01 before generating a preview.
+                        </p>
+                    </div>
+                    }
+                </div>
+            </article>
+
+            <!-- GENERATED RESULT -->
+            <article class="preview-frame preview-result-frame">
+                <div class="preview-frame-header">
+                    <div>
+                        <span class="preview-kicker">Generated result</span>
+                        <h3>Hair Preview</h3>
+                    </div>
+
+                    @if (selectedHairPreviewUrl()) {
+                    <span class="preview-status preview-ready">
+                        ✓ Ready
+                    </span>
+                    } @else {
+                    <span class="preview-status">
+                        AI preview
+                    </span>
+                    }
+                </div>
+
+                <div class="preview-image preview-result-image">
+                    @if (selectedHairPreviewUrl()) {
+                    <img [src]="selectedHairPreviewUrl()" [alt]="selectedStyle.name + ' AI preview'" />
+                    } @else {
+                    <div class="preview-empty preview-ai-empty">
+                        <span class="preview-ai-mark">AI</span>
+
+                        <h4>{{ selectedStyle.name }}</h4>
+
+                        <p>
+                            Generate a preview using the client's original photo
+                            and selected haircut.
+                        </p>
+
+                        <button type="button" class="generate-preview-button"
+                            [disabled]="!previewUrl || isGeneratingHairPreview()"
+                            (click)="generateSelectedHairPreview()">
+                            @if (isGeneratingHairPreview()) {
+                            Generating preview...
+                            } @else {
+                            Generate AI Preview
+                            }
+                        </button>
+
+                        @if (!previewUrl) {
+                        <span class="preview-requirement">
+                            Upload an original photo first.
+                        </span>
+                        }
+
+                        @if (hairPreviewError()) {
+                        <span class="preview-error">
+                            {{ hairPreviewError() }}
+                        </span>
+                        }
+                    </div>
+                    }
+                </div>
+
+                @if (selectedHairPreviewUrl()) {
+                <div class="preview-result-footer">
+                    <div>
+                        <span>Applied style</span>
+                        <strong>{{ selectedStyle.name }}</strong>
+                    </div>
+
+                    <button type="button" class="regenerate-preview-button" [disabled]="isGeneratingHairPreview()"
+                        (click)="generateSelectedHairPreview()">
+                        {{ isGeneratingHairPreview()
+                        ? 'Generating...'
+                        : 'Generate again' }}
+                    </button>
+                </div>
+                }
+            </article>
+
+        </div>
+        }
+        } @else {
+
+        <div class="preview-locked">
+            <span class="preview-ai-mark">AI</span>
+
+            <div>
+                <span class="eyebrow">Preview not ready</span>
+                <h3>Choose a final haircut first.</h3>
+
+                <p>
+                    Select one style from your Hair shortlist above to unlock
+                    the AI preview.
+                </p>
+            </div>
+        </div>
+
+        }
+
     </section>
 
 </main>

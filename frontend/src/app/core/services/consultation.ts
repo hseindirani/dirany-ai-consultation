@@ -17,6 +17,13 @@ export interface BeardCandidate {
   isSelected: boolean;
   createdAt: string;
 }
+export interface ConsultationImage {
+  id: number;
+  consultationId: number;
+  hairCandidateId: number | null;
+  imageType: string;
+  createdAt: string;
+}
 
 @Service()
 export class Consultation {
@@ -97,6 +104,22 @@ export class Consultation {
   removeBeardCandidate(consultationId: number, candidateId: number) {
     return this.http.delete<void>(
       `${this.apiUrl}/consultations/${consultationId}/beard-candidates/${candidateId}`,
+    );
+  }
+  getImages(consultationId: number) {
+    return this.http.get<ConsultationImage[]>(
+      `${this.apiUrl}/consultations/${consultationId}/images`,
+    );
+  }
+
+  getImageUrl(consultationId: number, imageId: number) {
+    return `${this.apiUrl}/consultations/${consultationId}/images/${imageId}`;
+  }
+
+  generateHairPreview(consultationId: number, candidateId: number) {
+    return this.http.post<{ imageId: number; hairCandidateId: number }>(
+      `${this.apiUrl}/consultations/${consultationId}/hair-candidates/${candidateId}/preview`,
+      {},
     );
   }
 }

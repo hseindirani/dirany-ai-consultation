@@ -4,6 +4,7 @@ import { ActivatedRoute } from "@angular/router";
 import {
   BeardCandidate,
   Consultation,
+  ConsultationImage,
   HairCandidate,
 } from "../../../core/services/consultation";
 import { Customer } from "../../../core/services/customer";
@@ -26,9 +27,14 @@ export class ConsultationWorkspace implements OnInit {
   hairCandidates = signal<HairCandidate[]>([]);
   beardStyles = signal<StyleOption[]>([]);
   beardCandidates = signal<BeardCandidate[]>([]);
+  consultationImages = signal<ConsultationImage[]>([]);
+  isGeneratingHairPreview = signal(false);
+  hairPreviewError = signal<string | null>(null);
 
   readonly maxHairCandidates = 3;
   readonly maxBeardCandidates = 3;
+  selectedHairPreviewUrl = signal<string | null>(null);
+  selectedHairPreviewImageId = signal<number | null>(null);
 
   hairStyleIndex = signal(0);
   beardStyleIndex = signal(0);
@@ -87,6 +93,7 @@ export class ConsultationWorkspace implements OnInit {
     this.consultationService.getHairCandidates(consultationId).subscribe({
       next: (candidates) => {
         this.hairCandidates.set(candidates);
+        this.loadConsultationImages(consultationId);
       },
       error: (error) => {
         console.error("Failed to load hair candidates:", error);
@@ -109,8 +116,70 @@ export class ConsultationWorkspace implements OnInit {
         console.error("Failed to load beard candidates:", error);
       },
     });
+    this.loadConsultationImages(consultationId);
   }
+  loadConsultationImages(consultationId: number) {
+    this.consultationService.getImages(consultationId).subscribe({
+      next: (images) => {
+        this.consultationImages.set(images);
 
+        const originalImage = images.find(
+          (image) => image.imageType === "Original",
+        );
+
+        if (originalImage) {
+          this.previewUrl = this.consultationService.getImageUrl(
+            consultationId,
+            originalImage.id,
+          );
+        }
+
+        const selectedHairCandidate = this.hairCandidates().find(
+          (candidate) => candidate.isSelected,
+        );
+
+        if (!selectedHairCandidate) {
+          this.selectedHairPreviewUrl.set(null);
+          this.selectedHairPreviewImageId.set(null);
+          return;
+        }
+
+        const hairPreview = images
+          .filter(
+            (image) =>
+              image.imageType === "HairPreview" &&
+              image.hairCandidateId === selectedHairCandidate.id,
+          )
+          .sort((a, b) => {
+            const createdAtDifference =
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+            if (createdAtDifference !== 0) {
+              return createdAtDifference;
+            }
+
+            return b.id - a.id;
+          })[0];
+
+        if (hairPreview) {
+          this.selectedHairPreviewImageId.set(hairPreview.id);
+
+          this.selectedHairPreviewUrl.set(
+            this.consultationService.getImageUrl(
+              consultationId,
+              hairPreview.id,
+            ),
+          );
+        } else {
+          this.selectedHairPreviewUrl.set(null);
+          this.selectedHairPreviewImageId.set(null);
+        }
+      },
+      error: (error) => {
+        console.error("Failed to load consultation images:", error);
+      },
+    });
+  }
   previousHairStyle() {
     const styles = this.hairStyles();
 
@@ -147,7 +216,7 @@ export class ConsultationWorkspace implements OnInit {
     this.selectedFileName.set(file.name);
     this.uploadSuccess.set(false);
 
-    if (this.previewUrl) {
+    if (this.previewUrl?.startsWith("blob:")) {
       URL.revokeObjectURL(this.previewUrl);
     }
 
@@ -171,6 +240,8 @@ export class ConsultationWorkspace implements OnInit {
         next: () => {
           this.isUploading.set(false);
           this.uploadSuccess.set(true);
+
+          this.loadConsultationImages(consultation.id);
         },
         error: (error) => {
           console.error("Image upload failed:", error);
@@ -238,6 +309,11 @@ export class ConsultationWorkspace implements OnInit {
               isSelected: candidate.id === selectedCandidate.id,
             })),
           );
+
+          this.selectedHairPreviewUrl.set(null);
+          this.selectedHairPreviewImageId.set(null);
+
+          this.loadConsultationImages(consultation.id);
         },
         error: (error) => {
           console.error("Failed to select hair candidate:", error);
@@ -376,26 +452,81 @@ export class ConsultationWorkspace implements OnInit {
       });
   }
   getHairStyleImage(styleName: string): string {
-  const images: Record<string, string> = {
-    'Taper Fade': '/images/styles/hair/taper-fade.png',
-    'Buzz Cut': '/images/styles/hair/buzz-cut.png',
-    'Mohawk': '/images/styles/hair/mohawk.png',
-    'Textured Crop': '/images/styles/hair/textured-crop.png',
-    'Slick Back': '/images/styles/hair/slick-back.png',
-  };
+    const images: Record<string, string> = {
+      "Taper Fade": "/images/styles/hair/taper-fade.png",
+      "Buzz Cut": "/images/styles/hair/buzz-cut.png",
+      Mohawk: "/images/styles/hair/mohawk.png",
+      "Textured Crop": "/images/styles/hair/textured-crop.png",
+      "Slick Back": "/images/styles/hair/slick-back.png",
+    };
 
-  return images[styleName] ?? '';
-}
+    return images[styleName] ?? "";
+  }
 
-getBeardStyleImage(styleName: string): string {
-  const images: Record<string, string> = {
-    'Short Boxed Beard': '/images/styles/beard/short-boxed-beard.png',
-    'Pointy Beard': '/images/styles/beard/pointy-beard.png',
-    'Italian Beard': '/images/styles/beard/italian-beard.png',
-    'Stubble': '/images/styles/beard/stubble.png',
-    'Full Beard': '/images/styles/beard/full-beard.png',
-  };
+  getBeardStyleImage(styleName: string): string {
+    const images: Record<string, string> = {
+      "Short Boxed Beard": "/images/styles/beard/short-boxed-beard.png",
+      "Pointy Beard": "/images/styles/beard/pointy-beard.png",
+      "Italian Beard": "/images/styles/beard/italian-beard.png",
+      Stubble: "/images/styles/beard/stubble.png",
+      "Full Beard": "/images/styles/beard/full-beard.png",
+    };
 
-  return images[styleName] ?? '';
-}
+    return images[styleName] ?? "";
+  }
+  generateSelectedHairPreview() {
+    const consultation = this.consultation();
+
+    const selectedCandidate = this.hairCandidates().find(
+      (candidate) => candidate.isSelected,
+    );
+
+    if (!consultation || !selectedCandidate || this.isGeneratingHairPreview()) {
+      return;
+    }
+
+    this.isGeneratingHairPreview.set(true);
+    this.hairPreviewError.set(null);
+
+    this.consultationService
+      .generateHairPreview(consultation.id, selectedCandidate.id)
+      .subscribe({
+        next: (response) => {
+          this.selectedHairPreviewImageId.set(response.imageId);
+
+          this.selectedHairPreviewUrl.set(
+            this.consultationService.getImageUrl(
+              consultation.id,
+              response.imageId,
+            ),
+          );
+
+          this.isGeneratingHairPreview.set(false);
+
+          this.loadConsultationImages(consultation.id);
+        },
+        error: (error) => {
+          console.error("Failed to generate hair preview:", error);
+
+          this.hairPreviewError.set(
+            "Could not generate the preview. Please try again.",
+          );
+
+          this.isGeneratingHairPreview.set(false);
+        },
+      });
+  }
+  getSelectedHairCandidate() {
+    return this.hairCandidates().find((candidate) => candidate.isSelected);
+  }
+
+  getSelectedHairStyle() {
+    const candidate = this.getSelectedHairCandidate();
+
+    if (!candidate) {
+      return null;
+    }
+
+    return this.getHairStyleById(candidate.hairStyleId) ?? null;
+  }
 }
