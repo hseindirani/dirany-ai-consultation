@@ -1,0 +1,105 @@
+<div class="preview-comparison">
+  <article class="preview-frame">
+    <div class="preview-frame-header">
+      <div>
+        <span class="preview-kicker">Reference</span>
+        <h3>Original</h3>
+      </div>
+
+      @if (referenceUrl) {
+        <span class="preview-status preview-ready">✓ Ready</span>
+      } @else {
+        <span class="preview-status">Required</span>
+      }
+    </div>
+
+    <div class="preview-image">
+      @if (referenceUrl) {
+        <img [src]="referenceUrl" alt="Original customer photo" />
+      } @else {
+        <div class="preview-empty">
+          <span>Original photo required</span>
+          <p>{{ referenceMissingMessage }}</p>
+        </div>
+      }
+    </div>
+  </article>
+
+  <article class="preview-frame">
+    <div class="preview-frame-header">
+      <div>
+        <span class="preview-kicker">Generated result</span>
+        <h3>{{ generatedTitle }}</h3>
+      </div>
+
+      @if (generatedUrl) {
+        <span class="preview-status preview-ready">✓ Ready</span>
+      } @else {
+        <span class="preview-status">Not generated</span>
+      }
+    </div>
+
+    <div class="preview-image preview-result-image">
+      @if (generatedUrl) {
+        <img [src]="generatedUrl" [alt]="generatedAlt" />
+      } @else {
+        <div class="preview-empty preview-ai-empty">
+          <span class="preview-ai-mark">AI</span>
+
+          @if (styleName) {
+            <h4>{{ styleName }}</h4>
+          }
+
+          <p>{{ emptyMessage }}</p>
+
+          <button
+            type="button"
+            class="generate-preview-button"
+            [disabled]="!referenceUrl || isGenerating"
+            (click)="onGenerate()"
+          >
+            {{ isGenerating ? generatingLabel : generateLabel }}
+          </button>
+
+          @if (!referenceUrl) {
+            <span class="preview-requirement">
+              {{ referenceMissingMessage }}
+            </span>
+          }
+
+          @if (error) {
+            <span class="preview-error">
+              {{ error }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+
+    @if (generatedUrl) {
+      <div class="preview-result-footer">
+        @if (styleName) {
+          <div>
+            <span>Applied style</span>
+            <strong>{{ styleName }}</strong>
+          </div>
+        }
+
+        <button
+          type="button"
+          class="regenerate-preview-button"
+          [disabled]="isGenerating"
+          (click)="onGenerate()"
+        >
+          {{ isGenerating ? generatingLabel : regenerateLabel }}
+        </button>
+      </div>
+    }
+
+    @if (generatedUrl && error) {
+      <p class="preview-error footer-error">
+        {{ error }}
+      </p>
+    }
+  </article>
+</div>

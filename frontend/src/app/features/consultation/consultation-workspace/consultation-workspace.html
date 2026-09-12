@@ -21,55 +21,155 @@
 
     <!-- STEP 1 -->
     <section class="photo-section">
+
         <div class="section-number">01</div>
 
-        <div class="photo-content">
-            <div class="section-heading">
-                <span class="eyebrow">Current look</span>
-                <h2>Start with the client.</h2>
+        <div class="photo-section-header">
+            <span class="eyebrow">Current look</span>
 
-                <p>
-                    Use a clear current photo as the reference for the consultation.
-                </p>
-            </div>
+            <h2>Start with the client.</h2>
 
-            <div class="photo-actions">
-                <label class="file-button">
-                    Choose photo
-
-                    <input type="file" accept="image/*" (change)="onFileSelected($event)" />
-                </label>
-
-                @if (selectedFileName()) {
-                <span class="file-name">
-                    {{ selectedFileName() }}
-                </span>
-                }
-
-                <button class="upload-button" type="button" [disabled]="!selectedFile() || isUploading()"
-                    (click)="uploadPhoto()">
-                    {{ isUploading() ? 'Uploading...' : 'Upload photo' }}
-                </button>
-
-                @if (uploadSuccess()) {
-                <span class="upload-success">
-                    ✓ Photo ready
-                </span>
-                }
-            </div>
+            <p>
+                Upload a front reference for the consultation. Add a side profile
+                if you want to preview the haircut from another angle.
+            </p>
         </div>
 
-        <div class="photo-visual">
-            @if (previewUrl) {
-            <img [src]="previewUrl" alt="Selected customer photo" />
-            } @else {
-            <div class="photo-placeholder">
-                <span>PHOTO</span>
-                <p>Client reference</p>
-            </div>
-            }
+        <div class="photo-reference-grid">
+
+            <!-- FRONT -->
+            <article class="photo-reference-card">
+
+                <div class="photo-reference-card-header">
+                    <div>
+                        <span class="photo-angle-label">Primary reference</span>
+                        <h3>Front</h3>
+                    </div>
+
+                    @if (previewUrl) {
+                    <span class="photo-ready-status">✓ Ready</span>
+                    } @else {
+                    <span class="photo-required-status">Required</span>
+                    }
+                </div>
+
+                <div class="photo-reference-visual">
+
+                    @if (previewUrl) {
+
+                    <img [src]="previewUrl" alt="Front customer reference" />
+
+                    } @else {
+
+                    <div class="photo-placeholder">
+                        <span>FRONT</span>
+                        <p>Client reference</p>
+                    </div>
+
+                    }
+
+                </div>
+
+                <div class="photo-reference-actions">
+
+                    <label class="file-button">
+                        Choose photo
+
+                        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+                    </label>
+
+                    @if (selectedFileName()) {
+                    <span class="file-name">
+                        {{ selectedFileName() }}
+                    </span>
+                    }
+
+                    <button class="upload-button" type="button" [disabled]="!selectedFile() || isUploading()"
+                        (click)="uploadPhoto()">
+                        {{ isUploading() ? 'Uploading...' : 'Upload photo' }}
+                    </button>
+
+                    @if (uploadSuccess()) {
+                    <span class="upload-success">
+                        ✓ Front ready
+                    </span>
+                    }
+
+                </div>
+
+            </article>
+
+
+            <!-- SIDE -->
+            <article class="photo-reference-card">
+
+                <div class="photo-reference-card-header">
+                    <div>
+                        <span class="photo-angle-label">Profile reference</span>
+                        <h3>Side</h3>
+                    </div>
+
+                    @if (sidePreviewUrl()) {
+                    <span class="photo-ready-status">✓ Ready</span>
+                    } @else {
+                    <span class="photo-required-status">Optional</span>
+                    }
+                </div>
+
+                <div class="photo-reference-visual">
+
+                    @if (sidePreviewUrl()) {
+
+                    <img [src]="sidePreviewUrl()" alt="Side customer reference" />
+
+                    } @else {
+
+                    <div class="photo-placeholder">
+                        <span>SIDE</span>
+                        <p>Profile reference</p>
+                    </div>
+
+                    }
+
+                </div>
+
+                <div class="photo-reference-actions">
+
+                    <label class="file-button">
+                        Choose photo
+
+                        <input type="file" accept="image/*" (change)="onSideFileSelected($event)" />
+                    </label>
+
+                    @if (sideSelectedFileName()) {
+                    <span class="file-name">
+                        {{ sideSelectedFileName() }}
+                    </span>
+                    }
+
+                    <button class="upload-button" type="button"
+                        [disabled]="!sideSelectedFile() || isUploadingSidePhoto()" (click)="uploadSidePhoto()">
+                        {{
+                        isUploadingSidePhoto()
+                        ? 'Uploading...'
+                        : 'Upload photo'
+                        }}
+                    </button>
+
+                    @if (sideUploadSuccess()) {
+                    <span class="upload-success">
+                        ✓ Side ready
+                    </span>
+                    }
+
+                </div>
+
+            </article>
+
         </div>
+
     </section>
+
 
     <!-- STEP 2 -->
     <section class="hair-section">
@@ -143,6 +243,7 @@
                 }
             </div>
 
+
             <!-- HAIR SHORTLIST -->
             <aside class="shortlist-panel">
                 <div class="shortlist-header">
@@ -169,6 +270,7 @@
                     @for (candidate of hairCandidates(); track candidate.id) {
                     @if (getHairStyleById(candidate.hairStyleId); as style) {
                     <article class="shortlist-item" [class.final-choice]="candidate.isSelected">
+
                         <div class="shortlist-thumbnail">
                             <img [src]="getHairStyleImage(style.name)" [alt]="style.name + ' reference'" />
                         </div>
@@ -221,6 +323,7 @@
         </div>
     </section>
 
+
     <!-- STEP 3 -->
     <section class="beard-section">
         <div class="section-intro">
@@ -263,6 +366,7 @@
                     @for (candidate of beardCandidates(); track candidate.id) {
                     @if (getBeardStyleById(candidate.beardStyleId); as style) {
                     <article class="shortlist-item" [class.final-choice]="candidate.isSelected">
+
                         <div class="shortlist-thumbnail beard-shortlist-thumbnail">
                             <img [src]="getBeardStyleImage(style.name)" [alt]="style.name + ' reference'" />
                         </div>
@@ -314,6 +418,7 @@
                 </p>
                 }
             </aside>
+
 
             <!-- BEARD STYLE SPOTLIGHT -->
             <div class="style-stage beard-stage">
@@ -374,385 +479,217 @@
         </div>
     </section>
 
-    <!-- STEP 4 -->
-    <section class="ai-preview-section">
-        <div class="section-intro">
-            <div>
-                <span class="eyebrow">04 / AI Preview</span>
-                <h2>See the direction come to life.</h2>
+
+    <!-- STEP 4 — PREVIEW STUDIO -->
+    <section class="preview-studio">
+
+        <div class="preview-studio-header">
+            <div class="preview-studio-heading">
+                <span class="eyebrow">04 / Preview Studio</span>
+
+                <h2>Shape the final look.</h2>
+
+                <p>
+                    Compare the selected styles on the client before making the final decision.
+                </p>
             </div>
 
-            <p>
-                Preview the selected haircut on the client before making the final decision.
-            </p>
+            <div class="preview-mode-tabs">
+                <button type="button" class="preview-mode-tab" [class.active]="activePreviewMode() === 'hair'"
+                    (click)="setPreviewMode('hair')">
+                    Hair
+                </button>
+
+                <button type="button" class="preview-mode-tab" [class.active]="activePreviewMode() === 'beard'"
+                    (click)="setPreviewMode('beard')">
+                    Beard
+                </button>
+
+                <button type="button" class="preview-mode-tab" [class.active]="activePreviewMode() === 'combined'"
+                    (click)="setPreviewMode('combined')">
+                    Combined
+                </button>
+            </div>
         </div>
 
-        @if (getSelectedHairCandidate(); as selectedCandidate) {
-        @if (getSelectedHairStyle(); as selectedStyle) {
 
-        <div class="ai-preview-selection">
-            <span class="preview-selection-label">Selected haircut</span>
+        <div class="preview-studio-body">
 
-            <div class="preview-selection-style">
-                <div class="preview-style-thumbnail">
+            <!-- HAIR MODE -->
+            <!-- HAIR MODE -->
+            @if (activePreviewMode() === 'hair') {
+
+            @if (getSelectedHairStyle(); as selectedStyle) {
+
+            <div class="preview-studio-selection">
+                <div class="preview-studio-selection-image">
                     <img [src]="getHairStyleImage(selectedStyle.name)" [alt]="selectedStyle.name + ' reference'" />
                 </div>
 
-                <div>
-                    <span>Final hair direction</span>
+                <div class="preview-studio-selection-copy">
+                    <span>Selected haircut</span>
                     <strong>{{ selectedStyle.name }}</strong>
                 </div>
             </div>
-        </div>
 
-        <div class="ai-preview-comparison">
+            <div class="hair-angle-tabs">
+                <button type="button" class="hair-angle-tab" [class.active]="activeHairAngle() === 'Front'"
+                    (click)="setHairAngle('Front')">
+                    Front
+                </button>
 
-            <!-- ORIGINAL -->
-            <article class="preview-frame">
-                <div class="preview-frame-header">
-                    <div>
-                        <span class="preview-kicker">Reference</span>
-                        <h3>Original</h3>
-                    </div>
-
-                    <span class="preview-status">Current look</span>
-                </div>
-
-                <div class="preview-image">
-                    @if (previewUrl) {
-                    <img [src]="previewUrl" alt="Original customer photo" />
-                    } @else {
-                    <div class="preview-empty">
-                        <span>Original photo required</span>
-                        <p>
-                            Upload a client photo in Step 01 before generating a preview.
-                        </p>
-                    </div>
-                    }
-                </div>
-            </article>
-
-            <!-- GENERATED RESULT -->
-            <article class="preview-frame preview-result-frame">
-                <div class="preview-frame-header">
-                    <div>
-                        <span class="preview-kicker">Generated result</span>
-                        <h3>Hair Preview</h3>
-                    </div>
-
-                    @if (selectedHairPreviewUrl()) {
-                    <span class="preview-status preview-ready">
-                        ✓ Ready
-                    </span>
-                    } @else {
-                    <span class="preview-status">
-                        AI preview
-                    </span>
-                    }
-                </div>
-
-                <div class="preview-image preview-result-image">
-                    @if (selectedHairPreviewUrl()) {
-                    <img [src]="selectedHairPreviewUrl()" [alt]="selectedStyle.name + ' AI preview'" />
-                    } @else {
-                    <div class="preview-empty preview-ai-empty">
-                        <span class="preview-ai-mark">AI</span>
-
-                        <h4>{{ selectedStyle.name }}</h4>
-
-                        <p>
-                            Generate a preview using the client's original photo
-                            and selected haircut.
-                        </p>
-
-                        <button type="button" class="generate-preview-button"
-                            [disabled]="!previewUrl || isGeneratingHairPreview()"
-                            (click)="generateSelectedHairPreview()">
-                            @if (isGeneratingHairPreview()) {
-                            Generating preview...
-                            } @else {
-                            Generate AI Preview
-                            }
-                        </button>
-
-                        @if (!previewUrl) {
-                        <span class="preview-requirement">
-                            Upload an original photo first.
-                        </span>
-                        }
-
-                        @if (hairPreviewError()) {
-                        <span class="preview-error">
-                            {{ hairPreviewError() }}
-                        </span>
-                        }
-                    </div>
-                    }
-                </div>
-
-                @if (selectedHairPreviewUrl()) {
-                <div class="preview-result-footer">
-                    <div>
-                        <span>Applied style</span>
-                        <strong>{{ selectedStyle.name }}</strong>
-                    </div>
-
-                    <button type="button" class="regenerate-preview-button" [disabled]="isGeneratingHairPreview()"
-                        (click)="generateSelectedHairPreview()">
-                        {{ isGeneratingHairPreview()
-                        ? 'Generating...'
-                        : 'Generate again' }}
-                    </button>
-                </div>
-                }
-            </article>
-
-        </div>
-        }
-        } @else {
-
-        <div class="preview-locked">
-            <span class="preview-ai-mark">AI</span>
-
-            <div>
-                <span class="eyebrow">Preview not ready</span>
-                <h3>Choose a final haircut first.</h3>
-
-                <p>
-                    Select one style from your Hair shortlist above to unlock
-                    the AI preview.
-                </p>
-            </div>
-        </div>
-
-        }
-
-    </section>
-    <!-- BEARD AI PREVIEW -->
-    <section class="ai-preview-section">
-        <div class="section-intro">
-            <div>
-                <span class="eyebrow">Beard preview</span>
-                <h2>Preview the selected beard.</h2>
+                <button type="button" class="hair-angle-tab" [class.active]="activeHairAngle() === 'Side'"
+                    (click)="setHairAngle('Side')">
+                    Side
+                </button>
             </div>
 
-            <p>
-                See how the selected beard direction looks on the client before making the final decision.
-            </p>
-        </div>
+            @if (activeHairAngle() === 'Front') {
 
-        @if (getSelectedBeardStyle(); as style) {
-        <div class="ai-preview-selection">
-            <img class="preview-style-thumbnail" [src]="getBeardStyleImage(style.name)"
-                [alt]="style.name + ' reference'" />
+            <app-preview-comparison [referenceUrl]="previewUrl" [generatedUrl]="selectedHairPreviewUrl()"
+                generatedTitle="Hair Preview" [generatedAlt]="selectedStyle.name + ' AI preview'"
+                [styleName]="selectedStyle.name"
+                emptyMessage="Generate a preview using the client's original photo and selected haircut."
+                referenceMissingMessage="Upload an original photo in Step 01 before generating a preview."
+                [isGenerating]="isGeneratingHairPreview()" [error]="hairPreviewError()"
+                (generate)="generateSelectedHairPreview()" />
 
-            <div>
-                <span>Selected beard</span>
-                <strong>{{ style.name }}</strong>
-            </div>
-        </div>
+            } @else {
 
-        <div class="ai-preview-comparison">
-            <article class="preview-frame">
-                <div class="preview-frame-header">
-                    <div>
-                        <span class="preview-kicker">Reference</span>
-                        <h3>Original</h3>
-                    </div>
+            <app-preview-comparison [referenceUrl]="sidePreviewUrl()" [generatedUrl]="selectedSideHairPreviewUrl()"
+                generatedTitle="Side Hair Preview" [generatedAlt]="selectedStyle.name + ' side AI preview'"
+                [styleName]="selectedStyle.name" emptyMessage="Generate a side preview using the selected haircut."
+                referenceMissingMessage="Upload a side reference in Step 01 before generating this preview."
+                generateLabel="Generate side preview" [isGenerating]="isGeneratingSideHairPreview()"
+                [error]="sideHairPreviewError()" (generate)="generateSelectedSideHairPreview()" />
 
-                    @if (previewUrl) {
-                    <span class="preview-ready">Ready</span>
-                    }
-                </div>
+            }
 
-                @if (previewUrl) {
-                <div class="preview-image">
-                    <img [src]="previewUrl" alt="Original customer photo" />
-                </div>
-                } @else {
-                <div class="preview-empty">
-                    <p>Upload a client photo first.</p>
-                </div>
-                }
-            </article>
+            } @else {
 
-            <article class="preview-frame">
-                <div class="preview-frame-header">
-                    <div>
-                        <span class="preview-kicker">Generated result</span>
-                        <h3>Beard Preview</h3>
-                    </div>
+            <div class="preview-studio-locked">
+                <span class="preview-ai-mark">AI</span>
 
-                    @if (selectedBeardPreviewUrl()) {
-                    <span class="preview-ready">Generated</span>
-                    } @else {
-                    <span class="preview-status">Not generated</span>
-                    }
-                </div>
-
-                @if (selectedBeardPreviewUrl()) {
-                <div class="preview-image">
-                    <img [src]="selectedBeardPreviewUrl()" [alt]="style.name + ' beard preview'" />
-                </div>
-
-                <div class="preview-result-footer">
-                    <button type="button" class="regenerate-preview-button" [disabled]="isGeneratingBeardPreview()"
-                        (click)="generateSelectedBeardPreview()">
-                        {{
-                        isGeneratingBeardPreview()
-                        ? 'Generating...'
-                        : 'Generate again'
-                        }}
-                    </button>
-                </div>
-                } @else {
-                <div class="preview-ai-empty">
-                    <span class="preview-ai-mark">AI</span>
+                <div>
+                    <span class="eyebrow">Hair preview unavailable</span>
+                    <h3>Choose a final haircut first.</h3>
 
                     <p>
-                        Generate a preview using the selected beard style.
+                        Select one haircut from the shortlist to begin the visual preview.
                     </p>
-
-                    <button type="button" class="generate-preview-button"
-                        [disabled]="!previewUrl || isGeneratingBeardPreview()" (click)="generateSelectedBeardPreview()">
-                        {{
-                        isGeneratingBeardPreview()
-                        ? 'Generating...'
-                        : 'Generate AI Preview'
-                        }}
-                    </button>
                 </div>
-                }
-
-                @if (beardPreviewError()) {
-                <p class="preview-error">
-                    {{ beardPreviewError() }}
-                </p>
-                }
-            </article>
-        </div>
-        } @else {
-        <div class="preview-locked">
-            <span>Beard style required</span>
-            <p>Choose a final beard style before generating a preview.</p>
-        </div>
-        }
-    </section>
-    <!-- COMBINED AI PREVIEW -->
-    <section class="ai-preview-section">
-        <div class="section-intro">
-            <div>
-                <span class="eyebrow">Combined preview</span>
-                <h2>See the complete look.</h2>
             </div>
 
-            <p>
-                Preview the selected haircut and beard together on the client.
-            </p>
-        </div>
+            }
 
-        @if (getSelectedHairStyle(); as hairStyle) {
-        @if (getSelectedBeardStyle(); as beardStyle) {
+            }
+            <!-- BEARD MODE -->
+            @if (activePreviewMode() === 'beard') {
 
-        <div class="ai-preview-selection">
-            <div>
-                <span>Selected look</span>
-                <strong>{{ hairStyle.name }} + {{ beardStyle.name }}</strong>
+            @if (getSelectedBeardStyle(); as selectedStyle) {
+
+            <div class="preview-studio-selection">
+                <div class="preview-studio-selection-image">
+                    <img [src]="getBeardStyleImage(selectedStyle.name)" [alt]="selectedStyle.name + ' reference'" />
+                </div>
+
+                <div class="preview-studio-selection-copy">
+                    <span>Selected beard</span>
+                    <strong>{{ selectedStyle.name }}</strong>
+                </div>
             </div>
-        </div>
 
-        <div class="ai-preview-comparison">
-            <article class="preview-frame">
-                <div class="preview-frame-header">
-                    <div>
-                        <span class="preview-kicker">Reference</span>
-                        <h3>Original</h3>
-                    </div>
+            <app-preview-comparison [referenceUrl]="previewUrl" [generatedUrl]="selectedBeardPreviewUrl()"
+                generatedTitle="Beard Preview" [generatedAlt]="selectedStyle.name + ' beard preview'"
+                [styleName]="selectedStyle.name" emptyMessage="Generate a preview using the selected beard style."
+                referenceMissingMessage="Upload an original photo first." [isGenerating]="isGeneratingBeardPreview()"
+                [error]="beardPreviewError()" (generate)="generateSelectedBeardPreview()" />
 
-                    @if (previewUrl) {
-                    <span class="preview-ready">Ready</span>
-                    }
-                </div>
+            } @else {
 
-                @if (previewUrl) {
-                <div class="preview-image">
-                    <img [src]="previewUrl" alt="Original customer photo" />
-                </div>
-                } @else {
-                <div class="preview-empty">
-                    <p>Upload a client photo first.</p>
-                </div>
-                }
-            </article>
+            <div class="preview-studio-locked">
+                <span class="preview-ai-mark">AI</span>
 
-            <article class="preview-frame">
-                <div class="preview-frame-header">
-                    <div>
-                        <span class="preview-kicker">Generated result</span>
-                        <h3>Combined Preview</h3>
-                    </div>
-
-                    @if (selectedCombinedPreviewUrl()) {
-                    <span class="preview-ready">Generated</span>
-                    } @else {
-                    <span class="preview-status">Not generated</span>
-                    }
-                </div>
-
-                @if (selectedCombinedPreviewUrl()) {
-                <div class="preview-image">
-                    <img [src]="selectedCombinedPreviewUrl()" alt="Combined hair and beard preview" />
-                </div>
-
-                <div class="preview-result-footer">
-                    <button type="button" class="regenerate-preview-button" [disabled]="isGeneratingCombinedPreview()"
-                        (click)="generateCombinedPreview()">
-                        {{
-                        isGeneratingCombinedPreview()
-                        ? 'Generating...'
-                        : 'Generate again'
-                        }}
-                    </button>
-                </div>
-                } @else {
-                <div class="preview-ai-empty">
-                    <span class="preview-ai-mark">AI</span>
+                <div>
+                    <span class="eyebrow">Beard preview unavailable</span>
+                    <h3>Choose a final beard first.</h3>
 
                     <p>
-                        Generate the complete look using the selected haircut and beard.
+                        Select one beard style from the shortlist to begin the visual preview.
                     </p>
-
-                    <button type="button" class="generate-preview-button"
-                        [disabled]="!previewUrl || isGeneratingCombinedPreview()" (click)="generateCombinedPreview()">
-                        {{
-                        isGeneratingCombinedPreview()
-                        ? 'Generating...'
-                        : 'Generate combined preview'
-                        }}
-                    </button>
                 </div>
-                }
+            </div>
 
-                @if (combinedPreviewError()) {
-                <p class="preview-error">
-                    {{ combinedPreviewError() }}
-                </p>
-                }
-            </article>
+            }
+
+            }
+
+
+            <!-- COMBINED MODE -->
+            @if (activePreviewMode() === 'combined') {
+
+            @if (getSelectedHairStyle(); as hairStyle) {
+
+            @if (getSelectedBeardStyle(); as beardStyle) {
+
+            <div class="preview-studio-selection preview-studio-selection-combined">
+                <div class="preview-studio-selection-copy">
+                    <span>Selected complete look</span>
+
+                    <strong>
+                        {{ hairStyle.name }} + {{ beardStyle.name }}
+                    </strong>
+                </div>
+            </div>
+
+            <app-preview-comparison [referenceUrl]="previewUrl" [generatedUrl]="selectedCombinedPreviewUrl()"
+                generatedTitle="Combined Preview" generatedAlt="Combined hair and beard preview"
+                [styleName]="hairStyle.name + ' + ' + beardStyle.name"
+                emptyMessage="Generate the complete look using the selected haircut and beard."
+                referenceMissingMessage="Upload an original photo first." generateLabel="Generate combined preview"
+                [isGenerating]="isGeneratingCombinedPreview()" [error]="combinedPreviewError()"
+                (generate)="generateCombinedPreview()" />
+
+            } @else {
+
+            <div class="preview-studio-locked">
+                <span class="preview-ai-mark">AI</span>
+
+                <div>
+                    <span class="eyebrow">Combined preview unavailable</span>
+                    <h3>Hair and beard are required.</h3>
+
+                    <p>
+                        Select both a final haircut and beard style to preview
+                        the complete look.
+                    </p>
+                </div>
+            </div>
+
+            }
+
+            } @else {
+
+            <div class="preview-studio-locked">
+                <span class="preview-ai-mark">AI</span>
+
+                <div>
+                    <span class="eyebrow">Combined preview unavailable</span>
+                    <h3>Hair and beard are required.</h3>
+
+                    <p>
+                        Select both a final haircut and beard style to preview
+                        the complete look.
+                    </p>
+                </div>
+            </div>
+
+            }
+
+            }
+
         </div>
 
-        } @else {
-        <div class="preview-locked">
-            <span>Hair and beard required</span>
-            <p>Select both a final haircut and beard style first.</p>
-        </div>
-        }
-        } @else {
-        <div class="preview-locked">
-            <span>Hair and beard required</span>
-            <p>Select both a final haircut and beard style first.</p>
-        </div>
-        }
     </section>
 
 </main>

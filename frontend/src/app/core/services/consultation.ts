@@ -23,6 +23,7 @@ export interface ConsultationImage {
   hairCandidateId: number | null;
   beardCandidateId: number | null;
   imageType: string;
+  imageAngle: "Front" | "Side";
   createdAt: string;
 }
 
@@ -48,6 +49,16 @@ export class Consultation {
 
     return this.http.post(
       `${this.apiUrl}/consultations/${consultationId}/images/original`,
+      formData,
+    );
+  }
+  uploadSideOriginalPhoto(consultationId: number, file: File) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    return this.http.post(
+      `${this.apiUrl}/consultations/${consultationId}/images/original/side`,
       formData,
     );
   }
@@ -120,6 +131,15 @@ export class Consultation {
   generateHairPreview(consultationId: number, candidateId: number) {
     return this.http.post<{ imageId: number; hairCandidateId: number }>(
       `${this.apiUrl}/consultations/${consultationId}/hair-candidates/${candidateId}/preview`,
+      {},
+    );
+  }
+  generateSideHairPreview(consultationId: number, candidateId: number) {
+    return this.http.post<{
+      imageId: number;
+      hairCandidateId: number;
+    }>(
+      `${this.apiUrl}/consultations/${consultationId}/hair-candidates/${candidateId}/preview/side`,
       {},
     );
   }

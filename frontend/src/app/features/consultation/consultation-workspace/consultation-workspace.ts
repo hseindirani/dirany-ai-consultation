@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, signal } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
+import { PreviewComparison } from "../../../shared/preview-comparison/preview-comparison";
 
 import {
   BeardCandidate,
@@ -15,7 +16,7 @@ import {
 
 @Component({
   selector: "app-consultation-workspace",
-  imports: [],
+  imports: [PreviewComparison],
   templateUrl: "./consultation-workspace.html",
   styleUrl: "./consultation-workspace.css",
 })
@@ -28,6 +29,11 @@ export class ConsultationWorkspace implements OnInit {
   beardStyles = signal<StyleOption[]>([]);
   beardCandidates = signal<BeardCandidate[]>([]);
   consultationImages = signal<ConsultationImage[]>([]);
+  sideSelectedFile = signal<File | null>(null);
+  sideSelectedFileName = signal<string | null>(null);
+  isUploadingSidePhoto = signal(false);
+  sideUploadSuccess = signal(false);
+  sidePreviewUrl = signal<string | null>(null);
   isGeneratingHairPreview = signal(false);
   hairPreviewError = signal<string | null>(null);
   selectedBeardPreviewUrl = signal<string | null>(null);
@@ -38,11 +44,17 @@ export class ConsultationWorkspace implements OnInit {
   selectedCombinedPreviewImageId = signal<number | null>(null);
   isGeneratingCombinedPreview = signal(false);
   combinedPreviewError = signal<string | null>(null);
+  activePreviewMode = signal<"hair" | "beard" | "combined">("hair");
+  activeHairAngle = signal<"Front" | "Side">("Front");
 
   readonly maxHairCandidates = 3;
   readonly maxBeardCandidates = 3;
   selectedHairPreviewUrl = signal<string | null>(null);
   selectedHairPreviewImageId = signal<number | null>(null);
+  selectedSideHairPreviewUrl = signal<string | null>(null);
+  selectedSideHairPreviewImageId = signal<number | null>(null);
+  isGeneratingSideHairPreview = signal(false);
+  sideHairPreviewError = signal<string | null>(null);
 
   hairStyleIndex = signal(0);
   beardStyleIndex = signal(0);
@@ -138,15 +150,53 @@ export class ConsultationWorkspace implements OnInit {
         this.consultationImages.set(images);
 
         // ORIGINAL IMAGE
-        const originalImage = images.find(
-          (image) => image.imageType === "Original",
-        );
+        const originalImage = images
+          .filter(
+            (image) =>
+              image.imageType === "Original" && image.imageAngle === "Front",
+          )
+          .sort((a, b) => {
+            const createdAtDifference =
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+            if (createdAtDifference !== 0) {
+              return createdAtDifference;
+            }
+
+            return b.id - a.id;
+          })[0];
 
         if (originalImage) {
           this.previewUrl = this.consultationService.getImageUrl(
             consultationId,
             originalImage.id,
           );
+        }
+        const sideOriginalImage = images
+          .filter(
+            (image) =>
+              image.imageType === "Original" && image.imageAngle === "Side",
+          )
+          .sort((a, b) => {
+            const createdAtDifference =
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+            if (createdAtDifference !== 0) {
+              return createdAtDifference;
+            }
+
+            return b.id - a.id;
+          })[0];
+
+        if (sideOriginalImage) {
+          this.sidePreviewUrl.set(
+            this.consultationService.getImageUrl(
+              consultationId,
+              sideOriginalImage.id,
+            ),
+          );
+        } else {
+          this.sidePreviewUrl.set(null);
         }
 
         // CURRENTLY SELECTED CANDIDATES
@@ -159,14 +209,20 @@ export class ConsultationWorkspace implements OnInit {
         );
 
         // HAIR PREVIEW
+        // HAIR PREVIEW
         if (!selectedHairCandidate) {
           this.selectedHairPreviewUrl.set(null);
           this.selectedHairPreviewImageId.set(null);
+
+          this.selectedSideHairPreviewUrl.set(null);
+          this.selectedSideHairPreviewImageId.set(null);
         } else {
+          // FRONT
           const hairPreview = images
             .filter(
               (image) =>
                 image.imageType === "HairPreview" &&
+                image.imageAngle === "Front" &&
                 image.hairCandidateId === selectedHairCandidate.id,
             )
             .sort((a, b) => {
@@ -183,7 +239,6 @@ export class ConsultationWorkspace implements OnInit {
 
           if (hairPreview) {
             this.selectedHairPreviewImageId.set(hairPreview.id);
-
             this.selectedHairPreviewUrl.set(
               this.consultationService.getImageUrl(
                 consultationId,
@@ -193,6 +248,39 @@ export class ConsultationWorkspace implements OnInit {
           } else {
             this.selectedHairPreviewUrl.set(null);
             this.selectedHairPreviewImageId.set(null);
+          }
+
+          // SIDE
+          const sideHairPreview = images
+            .filter(
+              (image) =>
+                image.imageType === "HairPreview" &&
+                image.imageAngle === "Side" &&
+                image.hairCandidateId === selectedHairCandidate.id,
+            )
+            .sort((a, b) => {
+              const createdAtDifference =
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime();
+
+              if (createdAtDifference !== 0) {
+                return createdAtDifference;
+              }
+
+              return b.id - a.id;
+            })[0];
+
+          if (sideHairPreview) {
+            this.selectedSideHairPreviewImageId.set(sideHairPreview.id);
+            this.selectedSideHairPreviewUrl.set(
+              this.consultationService.getImageUrl(
+                consultationId,
+                sideHairPreview.id,
+              ),
+            );
+          } else {
+            this.selectedSideHairPreviewUrl.set(null);
+            this.selectedSideHairPreviewImageId.set(null);
           }
         }
 
@@ -205,6 +293,7 @@ export class ConsultationWorkspace implements OnInit {
             .filter(
               (image) =>
                 image.imageType === "BeardPreview" &&
+                image.imageAngle === "Front" &&
                 image.beardCandidateId === selectedBeardCandidate.id,
             )
             .sort((a, b) => {
@@ -241,6 +330,7 @@ export class ConsultationWorkspace implements OnInit {
                 .filter(
                   (image) =>
                     image.imageType === "CombinedPreview" &&
+                    image.imageAngle === "Front" &&
                     image.hairCandidateId === selectedHairCandidate.id &&
                     image.beardCandidateId === selectedBeardCandidate.id,
                 )
@@ -300,6 +390,12 @@ export class ConsultationWorkspace implements OnInit {
       index === styles.length - 1 ? 0 : index + 1,
     );
   }
+  setPreviewMode(mode: "hair" | "beard" | "combined") {
+    this.activePreviewMode.set(mode);
+  }
+  setHairAngle(angle: "Front" | "Side") {
+    this.activeHairAngle.set(angle);
+  }
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -318,6 +414,20 @@ export class ConsultationWorkspace implements OnInit {
     }
 
     this.previewUrl = URL.createObjectURL(file);
+  }
+  onSideFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      this.sideSelectedFile.set(null);
+      this.sideSelectedFileName.set(null);
+      return;
+    }
+
+    this.sideSelectedFile.set(file);
+    this.sideSelectedFileName.set(file.name);
+    this.sideUploadSuccess.set(false);
   }
 
   uploadPhoto() {
@@ -343,6 +453,35 @@ export class ConsultationWorkspace implements OnInit {
         error: (error) => {
           console.error("Image upload failed:", error);
           this.isUploading.set(false);
+        },
+      });
+  }
+  uploadSidePhoto() {
+    const consultation = this.consultation();
+    const file = this.sideSelectedFile();
+
+    if (!consultation || !file || this.isUploadingSidePhoto()) {
+      return;
+    }
+
+    this.isUploadingSidePhoto.set(true);
+    this.sideUploadSuccess.set(false);
+
+    this.consultationService
+      .uploadSideOriginalPhoto(consultation.id, file)
+      .subscribe({
+        next: () => {
+          this.isUploadingSidePhoto.set(false);
+          this.sideUploadSuccess.set(true);
+
+          this.sideSelectedFile.set(null);
+          this.sideSelectedFileName.set(null);
+
+          this.loadConsultationImages(consultation.id);
+        },
+        error: (error) => {
+          console.error("Failed to upload side photo:", error);
+          this.isUploadingSidePhoto.set(false);
         },
       });
   }
@@ -409,6 +548,10 @@ export class ConsultationWorkspace implements OnInit {
 
           this.selectedHairPreviewUrl.set(null);
           this.selectedHairPreviewImageId.set(null);
+
+          this.selectedSideHairPreviewUrl.set(null);
+          this.selectedSideHairPreviewImageId.set(null);
+          this.sideHairPreviewError.set(null);
 
           this.selectedCombinedPreviewUrl.set(null);
           this.selectedCombinedPreviewImageId.set(null);
@@ -620,6 +763,54 @@ export class ConsultationWorkspace implements OnInit {
           );
 
           this.isGeneratingHairPreview.set(false);
+        },
+      });
+  }
+  generateSelectedSideHairPreview() {
+    const consultation = this.consultation();
+
+    const selectedHairCandidate = this.hairCandidates().find(
+      (candidate) => candidate.isSelected,
+    );
+
+    if (
+      !consultation ||
+      !selectedHairCandidate ||
+      !this.sidePreviewUrl() ||
+      this.isGeneratingSideHairPreview()
+    ) {
+      return;
+    }
+
+    this.isGeneratingSideHairPreview.set(true);
+    this.sideHairPreviewError.set(null);
+
+    this.consultationService
+      .generateSideHairPreview(consultation.id, selectedHairCandidate.id)
+      .subscribe({
+        next: (response) => {
+          this.selectedSideHairPreviewImageId.set(response.imageId);
+
+          this.selectedSideHairPreviewUrl.set(
+            this.consultationService.getImageUrl(
+              consultation.id,
+              response.imageId,
+            ),
+          );
+
+          this.isGeneratingSideHairPreview.set(false);
+
+          this.loadConsultationImages(consultation.id);
+        },
+
+        error: (error) => {
+          console.error("Failed to generate side hair preview:", error);
+
+          this.sideHairPreviewError.set(
+            "Could not generate the side hair preview. Please try again.",
+          );
+
+          this.isGeneratingSideHairPreview.set(false);
         },
       });
   }
