@@ -124,9 +124,15 @@ export class Consultation {
     );
   }
   generateBeardPreview(consultationId: number, candidateId: number) {
-  return this.http.post<{ imageId: number; beardCandidateId: number }>(
-    `${this.apiUrl}/consultations/${consultationId}/beard-candidates/${candidateId}/preview`,
-    {},
-  );
-}
+    return this.http.post<{ imageId: number; beardCandidateId: number }>(
+      `${this.apiUrl}/consultations/${consultationId}/beard-candidates/${candidateId}/preview`,
+      {},
+    );
+  }
+  generateCombinedPreview(consultationId: number) {
+    return this.http.post<{ imageId: number }>(
+      `${this.apiUrl}/consultations/${consultationId}/combined-preview`,
+      {},
+    );
+  }
 }

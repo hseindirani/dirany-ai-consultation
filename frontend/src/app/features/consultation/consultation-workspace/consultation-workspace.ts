@@ -34,6 +34,10 @@ export class ConsultationWorkspace implements OnInit {
   selectedBeardPreviewImageId = signal<number | null>(null);
   isGeneratingBeardPreview = signal(false);
   beardPreviewError = signal<string | null>(null);
+  selectedCombinedPreviewUrl = signal<string | null>(null);
+  selectedCombinedPreviewImageId = signal<number | null>(null);
+  isGeneratingCombinedPreview = signal(false);
+  combinedPreviewError = signal<string | null>(null);
 
   readonly maxHairCandidates = 3;
   readonly maxBeardCandidates = 3;
@@ -133,6 +137,7 @@ export class ConsultationWorkspace implements OnInit {
       next: (images) => {
         this.consultationImages.set(images);
 
+        // ORIGINAL IMAGE
         const originalImage = images.find(
           (image) => image.imageType === "Original",
         );
@@ -144,10 +149,16 @@ export class ConsultationWorkspace implements OnInit {
           );
         }
 
+        // CURRENTLY SELECTED CANDIDATES
         const selectedHairCandidate = this.hairCandidates().find(
           (candidate) => candidate.isSelected,
         );
 
+        const selectedBeardCandidate = this.beardCandidates().find(
+          (candidate) => candidate.isSelected,
+        );
+
+        // HAIR PREVIEW
         if (!selectedHairCandidate) {
           this.selectedHairPreviewUrl.set(null);
           this.selectedHairPreviewImageId.set(null);
@@ -184,47 +195,83 @@ export class ConsultationWorkspace implements OnInit {
             this.selectedHairPreviewImageId.set(null);
           }
         }
-        const selectedBeardCandidate = this.beardCandidates().find(
-          (candidate) => candidate.isSelected,
-        );
 
+        // BEARD PREVIEW
         if (!selectedBeardCandidate) {
           this.selectedBeardPreviewUrl.set(null);
           this.selectedBeardPreviewImageId.set(null);
-          return;
+        } else {
+          const beardPreview = images
+            .filter(
+              (image) =>
+                image.imageType === "BeardPreview" &&
+                image.beardCandidateId === selectedBeardCandidate.id,
+            )
+            .sort((a, b) => {
+              const createdAtDifference =
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime();
+
+              if (createdAtDifference !== 0) {
+                return createdAtDifference;
+              }
+
+              return b.id - a.id;
+            })[0];
+
+          if (beardPreview) {
+            this.selectedBeardPreviewImageId.set(beardPreview.id);
+
+            this.selectedBeardPreviewUrl.set(
+              this.consultationService.getImageUrl(
+                consultationId,
+                beardPreview.id,
+              ),
+            );
+          } else {
+            this.selectedBeardPreviewUrl.set(null);
+            this.selectedBeardPreviewImageId.set(null);
+          }
         }
 
-        const beardPreview = images
-          .filter(
-            (image) =>
-              image.imageType === "BeardPreview" &&
-              image.beardCandidateId === selectedBeardCandidate.id,
-          )
-          .sort((a, b) => {
-            const createdAtDifference =
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        // COMBINED PREVIEW
+        const combinedPreview =
+          selectedHairCandidate && selectedBeardCandidate
+            ? images
+                .filter(
+                  (image) =>
+                    image.imageType === "CombinedPreview" &&
+                    image.hairCandidateId === selectedHairCandidate.id &&
+                    image.beardCandidateId === selectedBeardCandidate.id,
+                )
+                .sort((a, b) => {
+                  const createdAtDifference =
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime();
 
-            if (createdAtDifference !== 0) {
-              return createdAtDifference;
-            }
+                  if (createdAtDifference !== 0) {
+                    return createdAtDifference;
+                  }
 
-            return b.id - a.id;
-          })[0];
+                  return b.id - a.id;
+                })[0]
+            : undefined;
 
-        if (beardPreview) {
-          this.selectedBeardPreviewImageId.set(beardPreview.id);
+        if (combinedPreview) {
+          this.selectedCombinedPreviewImageId.set(combinedPreview.id);
 
-          this.selectedBeardPreviewUrl.set(
+          this.selectedCombinedPreviewUrl.set(
             this.consultationService.getImageUrl(
               consultationId,
-              beardPreview.id,
+              combinedPreview.id,
             ),
           );
         } else {
-          this.selectedBeardPreviewUrl.set(null);
-          this.selectedBeardPreviewImageId.set(null);
+          this.selectedCombinedPreviewImageId.set(null);
+          this.selectedCombinedPreviewUrl.set(null);
         }
       },
+
       error: (error) => {
         console.error("Failed to load consultation images:", error);
       },
@@ -363,6 +410,9 @@ export class ConsultationWorkspace implements OnInit {
           this.selectedHairPreviewUrl.set(null);
           this.selectedHairPreviewImageId.set(null);
 
+          this.selectedCombinedPreviewUrl.set(null);
+          this.selectedCombinedPreviewImageId.set(null);
+
           this.loadConsultationImages(consultation.id);
         },
         error: (error) => {
@@ -477,6 +527,9 @@ export class ConsultationWorkspace implements OnInit {
 
           this.selectedBeardPreviewUrl.set(null);
           this.selectedBeardPreviewImageId.set(null);
+
+          this.selectedCombinedPreviewUrl.set(null);
+          this.selectedCombinedPreviewImageId.set(null);
 
           this.loadConsultationImages(consultation.id);
         },
@@ -613,6 +666,57 @@ export class ConsultationWorkspace implements OnInit {
           );
 
           this.isGeneratingBeardPreview.set(false);
+        },
+      });
+  }
+  generateCombinedPreview() {
+    const consultation = this.consultation();
+
+    const selectedHairCandidate = this.hairCandidates().find(
+      (candidate) => candidate.isSelected,
+    );
+
+    const selectedBeardCandidate = this.beardCandidates().find(
+      (candidate) => candidate.isSelected,
+    );
+
+    if (
+      !consultation ||
+      !selectedHairCandidate ||
+      !selectedBeardCandidate ||
+      this.isGeneratingCombinedPreview()
+    ) {
+      return;
+    }
+
+    this.isGeneratingCombinedPreview.set(true);
+    this.combinedPreviewError.set(null);
+
+    this.consultationService
+      .generateCombinedPreview(consultation.id)
+      .subscribe({
+        next: (response) => {
+          this.selectedCombinedPreviewImageId.set(response.imageId);
+
+          this.selectedCombinedPreviewUrl.set(
+            this.consultationService.getImageUrl(
+              consultation.id,
+              response.imageId,
+            ),
+          );
+
+          this.isGeneratingCombinedPreview.set(false);
+
+          this.loadConsultationImages(consultation.id);
+        },
+        error: (error) => {
+          console.error("Failed to generate combined preview:", error);
+
+          this.combinedPreviewError.set(
+            "Could not generate the combined preview. Please try again.",
+          );
+
+          this.isGeneratingCombinedPreview.set(false);
         },
       });
   }

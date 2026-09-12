@@ -556,8 +556,8 @@
             <article class="preview-frame">
                 <div class="preview-frame-header">
                     <div>
-                        <span>Original</span>
-                        <strong>Current look</strong>
+                        <span class="preview-kicker">Reference</span>
+                        <h3>Original</h3>
                     </div>
 
                     @if (previewUrl) {
@@ -579,8 +579,8 @@
             <article class="preview-frame">
                 <div class="preview-frame-header">
                     <div>
-                        <span>Beard preview</span>
-                        <strong>{{ style.name }}</strong>
+                        <span class="preview-kicker">Generated result</span>
+                        <h3>Beard Preview</h3>
                     </div>
 
                     @if (selectedBeardPreviewUrl()) {
@@ -635,6 +635,122 @@
         <div class="preview-locked">
             <span>Beard style required</span>
             <p>Choose a final beard style before generating a preview.</p>
+        </div>
+        }
+    </section>
+    <!-- COMBINED AI PREVIEW -->
+    <section class="ai-preview-section">
+        <div class="section-intro">
+            <div>
+                <span class="eyebrow">Combined preview</span>
+                <h2>See the complete look.</h2>
+            </div>
+
+            <p>
+                Preview the selected haircut and beard together on the client.
+            </p>
+        </div>
+
+        @if (getSelectedHairStyle(); as hairStyle) {
+        @if (getSelectedBeardStyle(); as beardStyle) {
+
+        <div class="ai-preview-selection">
+            <div>
+                <span>Selected look</span>
+                <strong>{{ hairStyle.name }} + {{ beardStyle.name }}</strong>
+            </div>
+        </div>
+
+        <div class="ai-preview-comparison">
+            <article class="preview-frame">
+                <div class="preview-frame-header">
+                    <div>
+                        <span class="preview-kicker">Reference</span>
+                        <h3>Original</h3>
+                    </div>
+
+                    @if (previewUrl) {
+                    <span class="preview-ready">Ready</span>
+                    }
+                </div>
+
+                @if (previewUrl) {
+                <div class="preview-image">
+                    <img [src]="previewUrl" alt="Original customer photo" />
+                </div>
+                } @else {
+                <div class="preview-empty">
+                    <p>Upload a client photo first.</p>
+                </div>
+                }
+            </article>
+
+            <article class="preview-frame">
+                <div class="preview-frame-header">
+                    <div>
+                        <span class="preview-kicker">Generated result</span>
+                        <h3>Combined Preview</h3>
+                    </div>
+
+                    @if (selectedCombinedPreviewUrl()) {
+                    <span class="preview-ready">Generated</span>
+                    } @else {
+                    <span class="preview-status">Not generated</span>
+                    }
+                </div>
+
+                @if (selectedCombinedPreviewUrl()) {
+                <div class="preview-image">
+                    <img [src]="selectedCombinedPreviewUrl()" alt="Combined hair and beard preview" />
+                </div>
+
+                <div class="preview-result-footer">
+                    <button type="button" class="regenerate-preview-button" [disabled]="isGeneratingCombinedPreview()"
+                        (click)="generateCombinedPreview()">
+                        {{
+                        isGeneratingCombinedPreview()
+                        ? 'Generating...'
+                        : 'Generate again'
+                        }}
+                    </button>
+                </div>
+                } @else {
+                <div class="preview-ai-empty">
+                    <span class="preview-ai-mark">AI</span>
+
+                    <p>
+                        Generate the complete look using the selected haircut and beard.
+                    </p>
+
+                    <button type="button" class="generate-preview-button"
+                        [disabled]="!previewUrl || isGeneratingCombinedPreview()" (click)="generateCombinedPreview()">
+                        {{
+                        isGeneratingCombinedPreview()
+                        ? 'Generating...'
+                        : 'Generate combined preview'
+                        }}
+                    </button>
+                </div>
+                }
+
+                @if (combinedPreviewError()) {
+                <p class="preview-error">
+                    {{ combinedPreviewError() }}
+                </p>
+                }
+            </article>
+        </div>
+
+        } @else {
+        <div class="preview-locked">
+            <span>Hair and beard required</span>
+            <p>Select both a final haircut and beard style first.</p>
+        </div>
+        }
+        } @else {
+        <div class="preview-locked">
+            <span>Hair and beard required</span>
+            <p>Select both a final haircut and beard style first.</p>
         </div>
         }
     </section>
