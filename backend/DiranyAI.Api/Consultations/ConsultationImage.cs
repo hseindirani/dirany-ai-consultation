@@ -6,6 +6,7 @@ public class ConsultationImage
 
     public long ConsultationId { get; set; }
     public Consultation Consultation { get; set; } = null!;
+    
 
     public long? HairCandidateId { get; set; }
     public HairCandidate? HairCandidate { get; set; }
@@ -13,6 +14,8 @@ public class ConsultationImage
     public BeardCandidate? BeardCandidate { get; set; }
 
     public ConsultationImageType ImageType { get; set; }
+    public ConsultationImageAngle ImageAngle { get; set; }
+    = ConsultationImageAngle.Front;
 
     public string StoragePath { get; set; } = string.Empty;
 

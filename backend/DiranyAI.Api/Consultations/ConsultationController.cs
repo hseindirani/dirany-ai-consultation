@@ -64,6 +64,7 @@ public class ConsultationController : ControllerBase
         var image = await _consultationImageService.UploadOriginalAsync(
             consultationId,
             file,
+            ConsultationImageAngle.Front,
             cancellationToken);
 
         return Ok(image);
@@ -177,6 +178,21 @@ public class ConsultationController : ControllerBase
         var result = await _hairPreviewService.GenerateAsync(
             consultationId,
             candidateId,
+            ConsultationImageAngle.Front,
+            cancellationToken);
+
+        return Ok(result);
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/hair-candidates/{candidateId:long}/preview/side")]
+    public async Task<ActionResult<HairPreviewResponse>> GenerateSideHairPreview(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken)
+    {
+        var result = await _hairPreviewService.GenerateAsync(
+            consultationId,
+            candidateId,
+            ConsultationImageAngle.Side,
             cancellationToken);
 
         return Ok(result);
@@ -219,6 +235,7 @@ public class ConsultationController : ControllerBase
 
         return Ok(result);
     }
+
     [HttpPost("/api/consultations/{consultationId:long}/combined-preview")]
     public async Task<ActionResult<CombinedPreviewResponse>> GenerateCombinedPreview(
     long consultationId,
@@ -229,5 +246,19 @@ public class ConsultationController : ControllerBase
             cancellationToken);
 
         return Ok(result);
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/images/original/side")]
+    public async Task<ActionResult<ConsultationImageResponse>> UploadSideOriginal(
+    long consultationId,
+    IFormFile file,
+    CancellationToken cancellationToken)
+    {
+        var response = await _consultationImageService.UploadOriginalAsync(
+            consultationId,
+            file,
+            ConsultationImageAngle.Side,
+            cancellationToken);
+
+        return Ok(response);
     }
 }

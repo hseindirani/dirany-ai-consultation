@@ -6,6 +6,6 @@
 
         public long HairCandidateId { get; init; }
 
-        public string StoragePath { get; init; } = string.Empty;
+       
     }
 }

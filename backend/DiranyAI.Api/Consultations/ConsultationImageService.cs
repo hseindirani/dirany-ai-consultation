@@ -22,6 +22,7 @@ public class ConsultationImageService
     public async Task<ConsultationImageResponse> UploadOriginalAsync(
         long consultationId,
         IFormFile file,
+        ConsultationImageAngle imageAngle,
         CancellationToken cancellationToken = default)
     {
         if (file.Length == 0)
@@ -62,6 +63,7 @@ public class ConsultationImageService
         {
             ConsultationId = consultationId,
             ImageType = ConsultationImageType.Original,
+            ImageAngle = imageAngle,
             StoragePath = storagePath,
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -74,7 +76,7 @@ public class ConsultationImageService
             Id = image.Id,
             ConsultationId = image.ConsultationId,
             ImageType = image.ImageType,
-            
+            ImageAngle = image.ImageAngle,
             CreatedAt = image.CreatedAt
         };
     }
@@ -122,7 +124,7 @@ public class ConsultationImageService
                 HairCandidateId = i.HairCandidateId,
                 BeardCandidateId = i.BeardCandidateId,
                 ImageType = i.ImageType,
-               
+                ImageAngle = i.ImageAngle,
                 CreatedAt = i.CreatedAt
             })
             .ToListAsync(cancellationToken);

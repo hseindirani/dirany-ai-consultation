@@ -13,7 +13,10 @@ public class ConsultationImageConfiguration
             .HasConversion<string>()
             .HasMaxLength(30)
             .IsRequired();
-
+        builder.Property(i => i.ImageAngle)
+             .HasConversion<string>()
+             .HasMaxLength(20)
+             .IsRequired();
         builder.Property(i => i.StoragePath)
             .HasMaxLength(500)
             .IsRequired();

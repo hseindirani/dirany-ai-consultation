@@ -7,5 +7,6 @@ public class ConsultationImageResponse
     public long? HairCandidateId { get; set; }
     public long? BeardCandidateId { get; set; }
     public ConsultationImageType ImageType { get; set; }
+    public ConsultationImageAngle ImageAngle { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 }

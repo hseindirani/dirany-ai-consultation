@@ -24,6 +24,7 @@ public class HairPreviewService
     public async Task<HairPreviewResponse> GenerateAsync(
     long consultationId,
     long candidateId,
+    ConsultationImageAngle imageAngle,
     CancellationToken cancellationToken = default)
     {
         var candidate = await _dbContext.HairCandidates
@@ -39,15 +40,18 @@ public class HairPreviewService
                 "The hair candidate does not exist for this consultation.");
         }
         var originalImage = await _dbContext.ConsultationImages
-    .FirstOrDefaultAsync(
-        i => i.ConsultationId == consultationId &&
-             i.ImageType == ConsultationImageType.Original,
-        cancellationToken);
+               .Where(i =>
+                  i.ConsultationId == consultationId &&
+                  i.ImageType == ConsultationImageType.Original &&
+                  i.ImageAngle == imageAngle)
+                    .OrderByDescending(i => i.CreatedAt)
+                   .ThenByDescending(i => i.Id)
+                   .FirstOrDefaultAsync(cancellationToken);
 
         if (originalImage is null)
         {
             throw new ArgumentException(
-                "This consultation does not have an original image.");
+                $"This consultation does not have an original {imageAngle} image.");
         }
         await using var originalImageStream =
             await _imageStorage.OpenReadAsync(
@@ -82,7 +86,7 @@ public class HairPreviewService
               cancellationToken);
 
         var previewFileName =
-               $"hair-preview-{consultationId}-{candidateId}.png";
+                $"hair-preview-{imageAngle.ToString().ToLowerInvariant()}-{consultationId}-{candidateId}.png";
 
         var storagePath =
             await _imageStorage.SaveAsync(
@@ -95,6 +99,7 @@ public class HairPreviewService
             ConsultationId = consultationId,
             HairCandidateId = candidateId,
             ImageType = ConsultationImageType.HairPreview,
+            ImageAngle = imageAngle,
             StoragePath = storagePath,
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -107,7 +112,7 @@ public class HairPreviewService
         {
             ImageId = previewImage.Id,
             HairCandidateId = candidateId,
-            StoragePath = previewImage.StoragePath
+            
         };
     }
 
