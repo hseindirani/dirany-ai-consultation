@@ -30,6 +30,7 @@ builder.Services.AddHttpClient<
     AzureImageGenerationService>();
 builder.Services.AddScoped<HairPreviewService>();
 builder.Services.AddScoped<BeardPreviewService>();
+builder.Services.AddScoped<CombinedPreviewService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IImageStorage, LocalImageStorage>();

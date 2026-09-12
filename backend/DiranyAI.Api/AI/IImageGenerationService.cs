@@ -11,4 +11,9 @@ public interface IImageGenerationService
         ImageInput originalImage,
         string prompt,
         CancellationToken cancellationToken = default);
+
+    Task<Stream> GenerateCombinedPreviewAsync(
+        ImageInput originalImage,
+        string prompt,
+        CancellationToken cancellationToken = default);
 }
