@@ -528,6 +528,116 @@
         }
 
     </section>
+    <!-- BEARD AI PREVIEW -->
+    <section class="ai-preview-section">
+        <div class="section-intro">
+            <div>
+                <span class="eyebrow">Beard preview</span>
+                <h2>Preview the selected beard.</h2>
+            </div>
+
+            <p>
+                See how the selected beard direction looks on the client before making the final decision.
+            </p>
+        </div>
+
+        @if (getSelectedBeardStyle(); as style) {
+        <div class="ai-preview-selection">
+            <img class="preview-style-thumbnail" [src]="getBeardStyleImage(style.name)"
+                [alt]="style.name + ' reference'" />
+
+            <div>
+                <span>Selected beard</span>
+                <strong>{{ style.name }}</strong>
+            </div>
+        </div>
+
+        <div class="ai-preview-comparison">
+            <article class="preview-frame">
+                <div class="preview-frame-header">
+                    <div>
+                        <span>Original</span>
+                        <strong>Current look</strong>
+                    </div>
+
+                    @if (previewUrl) {
+                    <span class="preview-ready">Ready</span>
+                    }
+                </div>
+
+                @if (previewUrl) {
+                <div class="preview-image">
+                    <img [src]="previewUrl" alt="Original customer photo" />
+                </div>
+                } @else {
+                <div class="preview-empty">
+                    <p>Upload a client photo first.</p>
+                </div>
+                }
+            </article>
+
+            <article class="preview-frame">
+                <div class="preview-frame-header">
+                    <div>
+                        <span>Beard preview</span>
+                        <strong>{{ style.name }}</strong>
+                    </div>
+
+                    @if (selectedBeardPreviewUrl()) {
+                    <span class="preview-ready">Generated</span>
+                    } @else {
+                    <span class="preview-status">Not generated</span>
+                    }
+                </div>
+
+                @if (selectedBeardPreviewUrl()) {
+                <div class="preview-image">
+                    <img [src]="selectedBeardPreviewUrl()" [alt]="style.name + ' beard preview'" />
+                </div>
+
+                <div class="preview-result-footer">
+                    <button type="button" class="regenerate-preview-button" [disabled]="isGeneratingBeardPreview()"
+                        (click)="generateSelectedBeardPreview()">
+                        {{
+                        isGeneratingBeardPreview()
+                        ? 'Generating...'
+                        : 'Generate again'
+                        }}
+                    </button>
+                </div>
+                } @else {
+                <div class="preview-ai-empty">
+                    <span class="preview-ai-mark">AI</span>
+
+                    <p>
+                        Generate a preview using the selected beard style.
+                    </p>
+
+                    <button type="button" class="generate-preview-button"
+                        [disabled]="!previewUrl || isGeneratingBeardPreview()" (click)="generateSelectedBeardPreview()">
+                        {{
+                        isGeneratingBeardPreview()
+                        ? 'Generating...'
+                        : 'Generate AI Preview'
+                        }}
+                    </button>
+                </div>
+                }
+
+                @if (beardPreviewError()) {
+                <p class="preview-error">
+                    {{ beardPreviewError() }}
+                </p>
+                }
+            </article>
+        </div>
+        } @else {
+        <div class="preview-locked">
+            <span>Beard style required</span>
+            <p>Choose a final beard style before generating a preview.</p>
+        </div>
+        }
+    </section>
 
 </main>
 } @else {

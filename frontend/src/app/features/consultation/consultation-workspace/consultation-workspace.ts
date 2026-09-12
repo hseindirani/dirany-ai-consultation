@@ -30,6 +30,10 @@ export class ConsultationWorkspace implements OnInit {
   consultationImages = signal<ConsultationImage[]>([]);
   isGeneratingHairPreview = signal(false);
   hairPreviewError = signal<string | null>(null);
+  selectedBeardPreviewUrl = signal<string | null>(null);
+  selectedBeardPreviewImageId = signal<number | null>(null);
+  isGeneratingBeardPreview = signal(false);
+  beardPreviewError = signal<string | null>(null);
 
   readonly maxHairCandidates = 3;
   readonly maxBeardCandidates = 3;
@@ -111,6 +115,12 @@ export class ConsultationWorkspace implements OnInit {
     this.consultationService.getBeardCandidates(consultationId).subscribe({
       next: (candidates) => {
         this.beardCandidates.set(candidates);
+
+        const consultation = this.consultation();
+
+        if (consultation) {
+          this.loadConsultationImages(consultation.id);
+        }
       },
       error: (error) => {
         console.error("Failed to load beard candidates:", error);
@@ -141,14 +151,54 @@ export class ConsultationWorkspace implements OnInit {
         if (!selectedHairCandidate) {
           this.selectedHairPreviewUrl.set(null);
           this.selectedHairPreviewImageId.set(null);
+        } else {
+          const hairPreview = images
+            .filter(
+              (image) =>
+                image.imageType === "HairPreview" &&
+                image.hairCandidateId === selectedHairCandidate.id,
+            )
+            .sort((a, b) => {
+              const createdAtDifference =
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime();
+
+              if (createdAtDifference !== 0) {
+                return createdAtDifference;
+              }
+
+              return b.id - a.id;
+            })[0];
+
+          if (hairPreview) {
+            this.selectedHairPreviewImageId.set(hairPreview.id);
+
+            this.selectedHairPreviewUrl.set(
+              this.consultationService.getImageUrl(
+                consultationId,
+                hairPreview.id,
+              ),
+            );
+          } else {
+            this.selectedHairPreviewUrl.set(null);
+            this.selectedHairPreviewImageId.set(null);
+          }
+        }
+        const selectedBeardCandidate = this.beardCandidates().find(
+          (candidate) => candidate.isSelected,
+        );
+
+        if (!selectedBeardCandidate) {
+          this.selectedBeardPreviewUrl.set(null);
+          this.selectedBeardPreviewImageId.set(null);
           return;
         }
 
-        const hairPreview = images
+        const beardPreview = images
           .filter(
             (image) =>
-              image.imageType === "HairPreview" &&
-              image.hairCandidateId === selectedHairCandidate.id,
+              image.imageType === "BeardPreview" &&
+              image.beardCandidateId === selectedBeardCandidate.id,
           )
           .sort((a, b) => {
             const createdAtDifference =
@@ -161,18 +211,18 @@ export class ConsultationWorkspace implements OnInit {
             return b.id - a.id;
           })[0];
 
-        if (hairPreview) {
-          this.selectedHairPreviewImageId.set(hairPreview.id);
+        if (beardPreview) {
+          this.selectedBeardPreviewImageId.set(beardPreview.id);
 
-          this.selectedHairPreviewUrl.set(
+          this.selectedBeardPreviewUrl.set(
             this.consultationService.getImageUrl(
               consultationId,
-              hairPreview.id,
+              beardPreview.id,
             ),
           );
         } else {
-          this.selectedHairPreviewUrl.set(null);
-          this.selectedHairPreviewImageId.set(null);
+          this.selectedBeardPreviewUrl.set(null);
+          this.selectedBeardPreviewImageId.set(null);
         }
       },
       error: (error) => {
@@ -424,13 +474,17 @@ export class ConsultationWorkspace implements OnInit {
               isSelected: candidate.id === selectedCandidate.id,
             })),
           );
+
+          this.selectedBeardPreviewUrl.set(null);
+          this.selectedBeardPreviewImageId.set(null);
+
+          this.loadConsultationImages(consultation.id);
         },
         error: (error) => {
           console.error("Failed to select beard candidate:", error);
         },
       });
   }
-
   removeBeardCandidate(candidateId: number) {
     const consultation = this.consultation();
 
@@ -516,6 +570,52 @@ export class ConsultationWorkspace implements OnInit {
         },
       });
   }
+  generateSelectedBeardPreview() {
+    const consultation = this.consultation();
+
+    const selectedCandidate = this.beardCandidates().find(
+      (candidate) => candidate.isSelected,
+    );
+
+    if (
+      !consultation ||
+      !selectedCandidate ||
+      this.isGeneratingBeardPreview()
+    ) {
+      return;
+    }
+
+    this.isGeneratingBeardPreview.set(true);
+    this.beardPreviewError.set(null);
+
+    this.consultationService
+      .generateBeardPreview(consultation.id, selectedCandidate.id)
+      .subscribe({
+        next: (response) => {
+          this.selectedBeardPreviewImageId.set(response.imageId);
+
+          this.selectedBeardPreviewUrl.set(
+            this.consultationService.getImageUrl(
+              consultation.id,
+              response.imageId,
+            ),
+          );
+
+          this.isGeneratingBeardPreview.set(false);
+
+          this.loadConsultationImages(consultation.id);
+        },
+        error: (error) => {
+          console.error("Failed to generate beard preview:", error);
+
+          this.beardPreviewError.set(
+            "Could not generate the preview. Please try again.",
+          );
+
+          this.isGeneratingBeardPreview.set(false);
+        },
+      });
+  }
   getSelectedHairCandidate() {
     return this.hairCandidates().find((candidate) => candidate.isSelected);
   }
@@ -528,5 +628,18 @@ export class ConsultationWorkspace implements OnInit {
     }
 
     return this.getHairStyleById(candidate.hairStyleId) ?? null;
+  }
+  getSelectedBeardCandidate() {
+    return this.beardCandidates().find((candidate) => candidate.isSelected);
+  }
+
+  getSelectedBeardStyle() {
+    const candidate = this.getSelectedBeardCandidate();
+
+    if (!candidate) {
+      return null;
+    }
+
+    return this.getBeardStyleById(candidate.beardStyleId) ?? null;
   }
 }

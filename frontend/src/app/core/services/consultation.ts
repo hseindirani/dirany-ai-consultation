@@ -21,6 +21,7 @@ export interface ConsultationImage {
   id: number;
   consultationId: number;
   hairCandidateId: number | null;
+  beardCandidateId: number | null;
   imageType: string;
   createdAt: string;
 }
@@ -122,4 +123,10 @@ export class Consultation {
       {},
     );
   }
+  generateBeardPreview(consultationId: number, candidateId: number) {
+  return this.http.post<{ imageId: number; beardCandidateId: number }>(
+    `${this.apiUrl}/consultations/${consultationId}/beard-candidates/${candidateId}/preview`,
+    {},
+  );
+}
 }
