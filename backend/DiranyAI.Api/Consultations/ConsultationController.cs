@@ -12,19 +12,22 @@ public class ConsultationController : ControllerBase
     private readonly HairCandidateService _hairCandidateService;
     private readonly BeardCandidateService _beardCandidateService;
     private readonly HairPreviewService _hairPreviewService;
+    private readonly BeardPreviewService _beardPreviewService;
 
     public ConsultationController(
         ConsultationService consultationService,
         ConsultationImageService consultationImageService,
         HairCandidateService hairCandidateService,
         BeardCandidateService beardCandidateService,
-        HairPreviewService hairPreviewService)
+        HairPreviewService hairPreviewService,
+        BeardPreviewService beardPreviewService)
     {
         _consultationService = consultationService;
         _consultationImageService = consultationImageService;
         _hairCandidateService = hairCandidateService;
         _beardCandidateService = beardCandidateService;
         _hairPreviewService = hairPreviewService;
+        _beardPreviewService = beardPreviewService;
     }
 
     [HttpPost]
@@ -199,5 +202,18 @@ public class ConsultationController : ControllerBase
             cancellationToken);
 
         return Ok(images);
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/beard-candidates/{candidateId:long}/preview")]
+    public async Task<ActionResult<BeardPreviewResponse>> GenerateBeardPreview(
+    long consultationId,
+    long candidateId,
+    CancellationToken cancellationToken)
+    {
+        var result = await _beardPreviewService.GenerateAsync(
+            consultationId,
+            candidateId,
+            cancellationToken);
+
+        return Ok(result);
     }
 }

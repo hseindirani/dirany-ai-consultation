@@ -29,9 +29,11 @@ builder.Services.AddHttpClient<
     IImageGenerationService,
     AzureImageGenerationService>();
 builder.Services.AddScoped<HairPreviewService>();
+builder.Services.AddScoped<BeardPreviewService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IImageStorage, LocalImageStorage>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>

@@ -25,5 +25,8 @@ public class ConsultationImageConfiguration
         builder.HasOne(i => i.HairCandidate)
             .WithMany()
             .HasForeignKey(i => i.HairCandidateId);
+        builder.HasOne(i => i.BeardCandidate)
+            .WithMany()
+            .HasForeignKey(i => i.BeardCandidateId);
     }
 }

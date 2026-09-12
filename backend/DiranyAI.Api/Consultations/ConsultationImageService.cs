@@ -120,6 +120,7 @@ public class ConsultationImageService
                 Id = i.Id,
                 ConsultationId = i.ConsultationId,
                 HairCandidateId = i.HairCandidateId,
+                BeardCandidateId = i.BeardCandidateId,
                 ImageType = i.ImageType,
                
                 CreatedAt = i.CreatedAt

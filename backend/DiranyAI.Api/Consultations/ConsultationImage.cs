@@ -9,6 +9,8 @@ public class ConsultationImage
 
     public long? HairCandidateId { get; set; }
     public HairCandidate? HairCandidate { get; set; }
+    public long? BeardCandidateId { get; set; }
+    public BeardCandidate? BeardCandidate { get; set; }
 
     public ConsultationImageType ImageType { get; set; }
 
