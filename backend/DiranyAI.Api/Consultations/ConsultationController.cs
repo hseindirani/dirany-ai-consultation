@@ -298,4 +298,14 @@ public class ConsultationController : ControllerBase
 
         return Ok(consultation);
     }
+    [HttpGet("/api/customers/{customerId:long}/consultations")]
+    public async Task<ActionResult<List<ConsultationResponse>>> GetCustomerConsultations(
+    long customerId,
+    CancellationToken cancellationToken)
+    {
+        var consultations = await _consultationService
+            .GetCustomerConsultationsAsync(customerId, cancellationToken);
+
+        return Ok(consultations);
+    }
 }

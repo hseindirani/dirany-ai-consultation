@@ -66,4 +66,31 @@ public class CustomerService
                 CreatedAt = customer.CreatedAt
             };
         }
+    public async Task<List<CustomerResponse>> SearchCustomersAsync(string search)
+    {
+        var searchTerm = search.Trim();
+
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return new List<CustomerResponse>();
+        }
+
+        return await _dbContext.Customers
+     .Where(c =>
+         EF.Functions.ILike(c.FirstName, $"%{searchTerm}%") ||
+         EF.Functions.ILike(c.LastName, $"%{searchTerm}%") ||
+         c.PhoneNumber.Contains(searchTerm))
+     .OrderBy(c => c.FirstName)
+     .ThenBy(c => c.LastName)
+     .Take(20)
+     .Select(c => new CustomerResponse
+     {
+         Id = c.Id,
+         FirstName = c.FirstName,
+         LastName = c.LastName,
+         PhoneNumber = c.PhoneNumber,
+         CreatedAt = c.CreatedAt
+     })
+     .ToListAsync();
     }
+}

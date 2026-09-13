@@ -2,6 +2,7 @@
 using DiranyAI.Api.Consultations.Dtos;
 using DiranyAI.Api.Data;
 using Microsoft.EntityFrameworkCore;
+using DiranyAI.Api.Customers;
 
 namespace DiranyAI.Api.Consultations;
 
@@ -150,5 +151,31 @@ public class ConsultationService
             CreatedAt = consultation.CreatedAt,
             CompletedAt = consultation.CompletedAt
         };
+    }
+    public async Task<List<ConsultationResponse>> GetCustomerConsultationsAsync(
+    long customerId,
+    CancellationToken cancellationToken = default)
+    {
+        var customerExists = await _dbContext.Customers
+            .AnyAsync(c => c.Id == customerId, cancellationToken);
+
+        if (!customerExists)
+        {
+            throw new CustomerNotFoundException(customerId);
+        }
+
+        return await _dbContext.Consultations
+            .Where(c => c.CustomerId == customerId)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new ConsultationResponse
+            {
+                Id = c.Id,
+                CustomerId = c.CustomerId,
+                Notes = c.Notes,
+                Status = c.Status,
+                CreatedAt = c.CreatedAt,
+                CompletedAt = c.CompletedAt
+            })
+            .ToListAsync(cancellationToken);
     }
 }

@@ -32,4 +32,12 @@ public class CustomerController : ControllerBase
 
         return Ok(customer);
     }
+    [HttpGet]
+    public async Task<ActionResult<List<CustomerResponse>>> SearchCustomers(
+    [FromQuery] string? search)
+    {
+        var customers = await _customerService.SearchCustomersAsync(search ?? string.Empty);
+
+        return Ok(customers);
+    }
 }
