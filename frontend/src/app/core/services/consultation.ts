@@ -26,6 +26,14 @@ export interface ConsultationImage {
   imageAngle: "Front" | "Side";
   createdAt: string;
 }
+export interface ConsultationResponse {
+  id: number;
+  customerId: number;
+  notes: string | null;
+  status: "InProgress" | "Completed";
+  createdAt: string;
+  completedAt: string | null;
+}
 
 @Service()
 export class Consultation {
@@ -40,7 +48,9 @@ export class Consultation {
   }
 
   getConsultation(id: number) {
-    return this.http.get(`${this.apiUrl}/consultations/${id}`);
+    return this.http.get<ConsultationResponse>(
+      `${this.apiUrl}/consultations/${id}`,
+    );
   }
 
   uploadOriginalImage(consultationId: number, file: File) {
@@ -152,6 +162,32 @@ export class Consultation {
   generateCombinedPreview(consultationId: number) {
     return this.http.post<{ imageId: number }>(
       `${this.apiUrl}/consultations/${consultationId}/combined-preview`,
+      {},
+    );
+  }
+  updateNotes(consultationId: number, notes: string) {
+    return this.http.put<ConsultationResponse>(
+      `${this.apiUrl}/consultations/${consultationId}/notes`,
+      {
+        notes,
+      },
+    );
+  }
+
+  uploadFinalResult(consultationId: number, file: File) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    return this.http.post<ConsultationImage>(
+      `${this.apiUrl}/consultations/${consultationId}/images/final-result`,
+      formData,
+    );
+  }
+
+  completeConsultation(consultationId: number) {
+    return this.http.post<ConsultationResponse>(
+      `${this.apiUrl}/consultations/${consultationId}/complete`,
       {},
     );
   }

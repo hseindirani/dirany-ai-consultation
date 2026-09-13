@@ -4,29 +4,179 @@
 
         <div class="form-heading">
             <span class="eyebrow">New Consultation</span>
-            <h1>Customer details</h1>
-            <p>Enter the customer's details to begin the consultation.</p>
+            <h1>Customer.</h1>
         </div>
 
-        <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
-            <div class="form-field">
-                <label for="firstName">First name</label>
-                <input id="firstName" type="text" formControlName="firstName" />
+        <!-- EXISTING CUSTOMER SEARCH -->
+        <section class="customer-search-section">
+            <div class="section-heading">
+                <span class="section-label">Existing customer</span>
             </div>
 
-            <div class="form-field">
-                <label for="lastName">Last name</label>
-                <input id="lastName" type="text" formControlName="lastName" />
+            <div class="search-field">
+                <input type="search" placeholder="Search by name or phone number" [value]="searchTerm()"
+                    (input)="onSearchInput($event)" />
             </div>
 
-            <div class="form-field">
-                <label for="phoneNumber">Phone number</label>
-                <input id="phoneNumber" type="tel" formControlName="phoneNumber" />
+            @if (isSearching()) {
+            <div class="search-state">
+                Searching...
+            </div>
+            }
+
+            @if (searchError()) {
+            <div class="search-error">
+                {{ searchError() }}
+            </div>
+            }
+
+            @if (
+            searchTerm() &&
+            !isSearching() &&
+            !searchError() &&
+            searchResults().length === 0
+            ) {
+            <div class="search-state">
+                No customers found.
+            </div>
+            }
+
+            @if (searchResults().length > 0 && !selectedCustomer()) {
+            <div class="customer-results">
+                @for (customer of searchResults(); track customer.id) {
+                <article class="customer-result-card">
+                    <div class="customer-result-copy">
+                        <strong>
+                            {{ customer.firstName }}
+                            {{ customer.lastName }}
+                        </strong>
+
+                        <span>
+                            {{ customer.phoneNumber }}
+                        </span>
+                    </div>
+
+                    <button type="button" class="customer-select-button" (click)="selectCustomer(customer)">
+                        View customer
+                    </button>
+                </article>
+                }
+            </div>
+            }
+
+            <!-- SELECTED CUSTOMER -->
+            @if (selectedCustomer(); as customer) {
+            <section class="selected-customer-panel">
+                <div class="selected-customer-header">
+                    <div>
+                        <span class="section-label">Selected customer</span>
+
+                        <h3>
+                            {{ customer.firstName }}
+                            {{ customer.lastName }}
+                        </h3>
+
+                        <span class="selected-customer-phone">
+                            {{ customer.phoneNumber }}
+                        </span>
+                    </div>
+
+                    <button type="button" class="customer-select-button" [disabled]="isSubmitting"
+                        (click)="startConsultation(customer.id)">
+                        {{ isSubmitting ? 'Starting...' : 'Start new consultation' }}
+                    </button>
+                </div>
+
+                <div class="customer-history">
+                    <span class="section-label">History</span>
+
+                    @if (isLoadingHistory()) {
+                    <div class="search-state">
+                        Loading history...
+                    </div>
+
+                    } @else if (historyError()) {
+                    <div class="search-error">
+                        {{ historyError() }}
+                    </div>
+
+                    } @else if (customerHistory().length === 0) {
+                    <div class="search-state">
+                        No previous consultations.
+                    </div>
+
+                    } @else {
+                    <div class="history-list">
+                        @for (consultation of customerHistory(); track consultation.id) {
+                        <article class="history-item">
+
+                            <div class="history-item-main">
+                                <strong>
+                                    Consultation #{{ consultation.id }}
+                                </strong>
+
+                                <span>
+                                    {{ consultation.createdAt | date:'dd MMM yyyy, HH:mm' }}
+                                </span>
+                            </div>
+
+                            <span class="history-status" [class.completed]="consultation.status === 'Completed'">
+                                @if (consultation.status === 'InProgress') {
+                                In progress
+                                } @else {
+                                Completed
+                                }
+                            </span>
+
+                            <button type="button" class="history-action" (click)="openConsultation(consultation.id)">
+                                {{ consultation.status === 'Completed' ? 'View' : 'Continue' }}
+                            </button>
+
+                            @if (consultation.notes) {
+                            <p>
+                                {{ consultation.notes }}
+                            </p>
+                            }
+
+                        </article>
+                        }
+                    </div>
+                    }
+                </div>
+            </section>
+            }
+        </section>
+
+        <div class="customer-divider">
+            <span>or</span>
+        </div>
+
+        <!-- NEW CUSTOMER -->
+        <section class="new-customer-section">
+            <div class="section-heading">
+                <span class="section-label">New customer</span>
             </div>
 
-            <button type="submit" [disabled]="isSubmitting">
-                {{ isSubmitting ? 'Starting...' : 'Continue' }}
-            </button>
-        </form>
+            <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+                <div class="form-field">
+                    <label for="firstName">First name</label>
+                    <input id="firstName" type="text" formControlName="firstName" />
+                </div>
+
+                <div class="form-field">
+                    <label for="lastName">Last name</label>
+                    <input id="lastName" type="text" formControlName="lastName" />
+                </div>
+
+                <div class="form-field">
+                    <label for="phoneNumber">Phone number</label>
+                    <input id="phoneNumber" type="tel" formControlName="phoneNumber" />
+                </div>
+
+                <button type="submit" [disabled]="isSubmitting">
+                    {{ isSubmitting ? 'Starting...' : 'Start consultation' }}
+                </button>
+            </form>
+        </section>
     </div>
 </div>

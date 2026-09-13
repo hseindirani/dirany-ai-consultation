@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, signal } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 import { PreviewComparison } from "../../../shared/preview-comparison/preview-comparison";
 
 import {
@@ -16,7 +16,7 @@ import {
 
 @Component({
   selector: "app-consultation-workspace",
-  imports: [PreviewComparison],
+  imports: [PreviewComparison, RouterLink],
   templateUrl: "./consultation-workspace.html",
   styleUrl: "./consultation-workspace.css",
 })
@@ -28,11 +28,19 @@ export class ConsultationWorkspace implements OnInit {
   hairCandidates = signal<HairCandidate[]>([]);
   beardStyles = signal<StyleOption[]>([]);
   beardCandidates = signal<BeardCandidate[]>([]);
+
   consultationImages = signal<ConsultationImage[]>([]);
+
+  finalResultUrl = signal<string | null>(null);
+  finalResultImageId = signal<number | null>(null);
   sideSelectedFile = signal<File | null>(null);
   sideSelectedFileName = signal<string | null>(null);
   isUploadingSidePhoto = signal(false);
   sideUploadSuccess = signal(false);
+  finalResultFile = signal<File | null>(null);
+  finalResultFileName = signal<string | null>(null);
+  isUploadingFinalResult = signal(false);
+  finalResultUploadError = signal<string | null>(null);
   sidePreviewUrl = signal<string | null>(null);
   isGeneratingHairPreview = signal(false);
   hairPreviewError = signal<string | null>(null);
@@ -55,7 +63,12 @@ export class ConsultationWorkspace implements OnInit {
   selectedSideHairPreviewImageId = signal<number | null>(null);
   isGeneratingSideHairPreview = signal(false);
   sideHairPreviewError = signal<string | null>(null);
-
+  notes = signal("");
+  isSavingNotes = signal(false);
+  notesSaveError = signal<string | null>(null);
+  notesSaved = signal(false);
+  isCompletingConsultation = signal(false);
+  completeConsultationError = signal<string | null>(null);
   hairStyleIndex = signal(0);
   beardStyleIndex = signal(0);
 
@@ -64,6 +77,9 @@ export class ConsultationWorkspace implements OnInit {
   });
   currentBeardStyle = computed(() => {
     return this.beardStyles()[this.beardStyleIndex()] ?? null;
+  });
+  isCompleted = computed(() => {
+    return this.consultation()?.status === "Completed";
   });
 
   selectedFile = signal<File | null>(null);
@@ -86,6 +102,7 @@ export class ConsultationWorkspace implements OnInit {
     this.consultationService.getConsultation(consultationId).subscribe({
       next: (consultation: any) => {
         this.consultation.set(consultation);
+        this.notes.set(consultation.notes ?? "");
 
         this.customerService.getCustomer(consultation.customerId).subscribe({
           next: (customer) => {
@@ -360,6 +377,37 @@ export class ConsultationWorkspace implements OnInit {
           this.selectedCombinedPreviewImageId.set(null);
           this.selectedCombinedPreviewUrl.set(null);
         }
+
+        // FINAL RESULT
+        const finalResult = images
+          .filter(
+            (image) =>
+              image.imageType === "FinalResult" && image.imageAngle === "Front",
+          )
+          .sort((a, b) => {
+            const createdAtDifference =
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+            if (createdAtDifference !== 0) {
+              return createdAtDifference;
+            }
+
+            return b.id - a.id;
+          })[0];
+
+        if (finalResult) {
+          this.finalResultImageId.set(finalResult.id);
+
+          this.finalResultUrl.set(
+            this.consultationService.getImageUrl(
+              consultationId,
+              finalResult.id,
+            ),
+          );
+        } else {
+          this.finalResultImageId.set(null);
+          this.finalResultUrl.set(null);
+        }
       },
 
       error: (error) => {
@@ -367,6 +415,120 @@ export class ConsultationWorkspace implements OnInit {
       },
     });
   }
+  onFinalResultSelected(event: Event) {
+    if (this.isCompleted()) return;
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      this.finalResultFile.set(null);
+      this.finalResultFileName.set(null);
+      return;
+    }
+
+    this.finalResultFile.set(file);
+    this.finalResultFileName.set(file.name);
+    this.finalResultUploadError.set(null);
+  }
+  uploadFinalResult() {
+    if (this.isCompleted()) return;
+    const consultation = this.consultation();
+    const file = this.finalResultFile();
+
+    if (!consultation || !file || this.isUploadingFinalResult()) {
+      return;
+    }
+
+    this.isUploadingFinalResult.set(true);
+    this.finalResultUploadError.set(null);
+
+    this.consultationService
+      .uploadFinalResult(consultation.id, file)
+      .subscribe({
+        next: () => {
+          this.isUploadingFinalResult.set(false);
+
+          this.finalResultFile.set(null);
+          this.finalResultFileName.set(null);
+
+          this.loadConsultationImages(consultation.id);
+        },
+        error: (error) => {
+          console.error("Final result upload failed:", error);
+
+          this.finalResultUploadError.set("Could not upload final result.");
+
+          this.isUploadingFinalResult.set(false);
+        },
+      });
+  }
+  saveNotes() {
+    const consultation = this.consultation();
+
+    if (!consultation || this.isSavingNotes()) {
+      return;
+    }
+
+    this.isSavingNotes.set(true);
+    this.notesSaveError.set(null);
+    this.notesSaved.set(false);
+
+    this.consultationService
+      .updateNotes(consultation.id, this.notes())
+      .subscribe({
+        next: (updatedConsultation) => {
+          this.consultation.set(updatedConsultation);
+          this.notes.set(updatedConsultation.notes ?? "");
+
+          this.isSavingNotes.set(false);
+          this.notesSaved.set(true);
+        },
+        error: (error) => {
+          console.error("Failed to save notes:", error);
+
+          this.notesSaveError.set("Could not save notes.");
+
+          this.isSavingNotes.set(false);
+        },
+      });
+  }
+  onNotesInput(event: Event) {
+    const textarea = event.target as HTMLTextAreaElement;
+
+    this.notes.set(textarea.value);
+    this.notesSaved.set(false);
+    this.notesSaveError.set(null);
+  }
+  completeConsultation() {
+    const consultation = this.consultation();
+
+    if (
+      !consultation ||
+      this.isCompletingConsultation() ||
+      !this.finalResultUrl()
+    ) {
+      return;
+    }
+
+    this.isCompletingConsultation.set(true);
+    this.completeConsultationError.set(null);
+
+    this.consultationService.completeConsultation(consultation.id).subscribe({
+      next: (updatedConsultation) => {
+        this.consultation.set(updatedConsultation);
+
+        this.isCompletingConsultation.set(false);
+      },
+      error: (error) => {
+        console.error("Failed to complete consultation:", error);
+
+        this.completeConsultationError.set("Could not complete consultation.");
+
+        this.isCompletingConsultation.set(false);
+      },
+    });
+  }
+
   previousHairStyle() {
     const styles = this.hairStyles();
 
@@ -398,6 +560,7 @@ export class ConsultationWorkspace implements OnInit {
   }
 
   onFileSelected(event: Event) {
+    if (this.isCompleted()) return;
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
@@ -416,6 +579,7 @@ export class ConsultationWorkspace implements OnInit {
     this.previewUrl = URL.createObjectURL(file);
   }
   onSideFileSelected(event: Event) {
+    if (this.isCompleted()) return;
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
@@ -431,6 +595,7 @@ export class ConsultationWorkspace implements OnInit {
   }
 
   uploadPhoto() {
+    if (this.isCompleted()) return;
     const consultation = this.consultation();
     const selectedFile = this.selectedFile();
 
@@ -457,6 +622,7 @@ export class ConsultationWorkspace implements OnInit {
       });
   }
   uploadSidePhoto() {
+    if (this.isCompleted()) return;
     const consultation = this.consultation();
     const file = this.sideSelectedFile();
 

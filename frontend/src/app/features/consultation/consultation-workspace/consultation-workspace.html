@@ -1,22 +1,39 @@
 @if (consultation() && customer()) {
 <main class="workspace">
+    <a class="workspace-back-link" [routerLink]="['/consultation/new']" [queryParams]="{ customerId: customer()?.id }">
+        ← Customer
+    </a>
 
-    <header class="customer-header">
-        <div>
-            <span class="status">Consultation in progress</span>
+    <header class="consultation-hero">
+
+        <div class="consultation-identity">
+            <div class="consultation-status" [class.completed]="isCompleted()">
+                <span class="status-dot"></span>
+
+                <span>
+                    {{ isCompleted() ? 'Consultation completed' : 'Consultation in progress' }}
+                </span>
+            </div>
 
             <h1>
-                {{ customer().firstName }}
-                {{ customer().lastName }}
+                {{ customer()?.firstName }}
+                {{ customer()?.lastName }}
             </h1>
 
-            <p>{{ customer().phoneNumber }}</p>
+            <div class="customer-phone">
+                <span class="phone-symbol">☎</span>
+                <span>{{ customer()?.phoneNumber }}</span>
+            </div>
         </div>
 
-        <div class="consultation-mark">
-            <span>Consultation</span>
-            <strong>#{{ consultation().id }}</strong>
+        <div class="consultation-number-card">
+            <span class="consultation-number-label">
+                Consultation
+            </span>
+
+            <strong>#{{ consultation()?.id }}</strong>
         </div>
+
     </header>
 
     <!-- STEP 1 -->
@@ -689,6 +706,138 @@
             }
 
         </div>
+
+    </section>
+    <section class="finish-consultation" [class.is-completed]="isCompleted()">
+        <div class="finish-heading">
+            <div>
+                <span class="finish-eyebrow">
+                    {{ isCompleted() ? 'Consultation complete' : 'Finish consultation' }}
+                </span>
+
+            </div>
+
+            @if (isCompleted()) {
+            <div class="completed-mark">
+                <span>✓</span>
+                Completed
+            </div>
+            }
+        </div>
+
+        <div class="finish-grid">
+
+            <!-- BARBER NOTES -->
+            <div class="finish-notes">
+                <div class="finish-section-heading">
+                    <span>Barber notes</span>
+                </div>
+
+                <textarea class="notes-input" rows="7" maxlength="1000"
+                    placeholder="Cut details, preferences, anything worth remembering..." [value]="notes()"
+                    [disabled]="isCompleted()" (input)="onNotesInput($event)"></textarea>
+
+                @if (!isCompleted()) {
+                <div class="notes-footer">
+                    <span class="notes-feedback">
+                        @if (notesSaved()) {
+                        Saved
+                        }
+
+                        @if (notesSaveError()) {
+                        {{ notesSaveError() }}
+                        }
+                    </span>
+
+                    <button type="button" class="secondary-action" [disabled]="isSavingNotes()" (click)="saveNotes()">
+                        {{ isSavingNotes() ? 'Saving...' : 'Save notes' }}
+                    </button>
+                </div>
+                }
+            </div>
+
+
+            <!-- FINAL PHOTO -->
+            <div class="finish-photo">
+                <div class="finish-section-heading">
+                    <span>Finished cut</span>
+                </div>
+
+                @if (finalResultUrl()) {
+                <div class="final-photo-frame">
+                    <img [src]="finalResultUrl()" alt="Finished haircut" />
+
+                    @if (!isCompleted()) {
+                    <label class="replace-photo">
+                        Replace photo
+
+                        <input type="file" accept="image/*" hidden (change)="onFinalResultSelected($event)" />
+                    </label>
+                    }
+                </div>
+                } @else {
+                <label class="final-photo-empty" [class.disabled]="isCompleted()">
+                    <div class="photo-plus">+</div>
+
+                    <strong>Add finished photo</strong>
+                    <span>Front view</span>
+
+                    @if (!isCompleted()) {
+                    <input type="file" accept="image/*" hidden (change)="onFinalResultSelected($event)" />
+                    }
+                </label>
+                }
+
+                @if (!isCompleted() && finalResultFileName()) {
+                <div class="selected-final-file">
+                    <span>{{ finalResultFileName() }}</span>
+
+                    <button type="button" class="upload-final-button" [disabled]="isUploadingFinalResult()"
+                        (click)="uploadFinalResult()">
+                        {{ isUploadingFinalResult() ? 'Uploading...' : 'Upload photo' }}
+                    </button>
+                </div>
+                }
+
+                @if (finalResultUploadError()) {
+                <p class="finish-error">
+                    {{ finalResultUploadError() }}
+                </p>
+                }
+            </div>
+
+        </div>
+
+
+        @if (!isCompleted()) {
+        <div class="finish-complete-row">
+            <div class="completion-requirement">
+                @if (finalResultUrl()) {
+                <span class="requirement-ready">✓</span>
+                <span>Ready to complete</span>
+                } @else {
+                <span class="requirement-dot"></span>
+                <span>Finished photo required</span>
+                }
+            </div>
+
+            <button type="button" class="complete-consultation-button" [disabled]="
+          !finalResultUrl() ||
+          isCompletingConsultation()
+        " (click)="completeConsultation()">
+                {{ isCompletingConsultation()
+                ? 'Completing...'
+                : 'Complete consultation'
+                }}
+            </button>
+        </div>
+
+        @if (completeConsultationError()) {
+        <p class="finish-error completion-error">
+            {{ completeConsultationError() }}
+        </p>
+        }
+        }
 
     </section>
 
