@@ -25,33 +25,75 @@ public class ConsultationImageService
         ConsultationImageAngle imageAngle,
         CancellationToken cancellationToken = default)
     {
+        return await UploadAsync(
+            consultationId,
+            file,
+            ConsultationImageType.Original,
+            imageAngle,
+            cancellationToken);
+    }
+
+    public async Task<ConsultationImageResponse> UploadFinalResultAsync(
+        long consultationId,
+        IFormFile file,
+        CancellationToken cancellationToken = default)
+    {
+        return await UploadAsync(
+            consultationId,
+            file,
+            ConsultationImageType.FinalResult,
+            ConsultationImageAngle.Front,
+            cancellationToken);
+    }
+
+    private async Task<ConsultationImageResponse> UploadAsync(
+        long consultationId,
+        IFormFile file,
+        ConsultationImageType imageType,
+        ConsultationImageAngle imageAngle,
+        CancellationToken cancellationToken)
+    {
         if (file.Length == 0)
         {
             throw new ArgumentException("The uploaded image is empty.");
         }
+
         var allowedContentTypes = new[]
-           {
-                    "image/jpeg",
-                    "image/png",
-                    "image/webp"
-           };
+        {
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        };
 
         if (!allowedContentTypes.Contains(file.ContentType))
         {
-            throw new ArgumentException("Only JPEG, PNG, and WEBP images are allowed.");
+            throw new ArgumentException(
+                "Only JPEG, PNG, and WEBP images are allowed.");
         }
+
         const long maxFileSize = 10 * 1024 * 1024;
 
         if (file.Length > maxFileSize)
         {
-            throw new ArgumentException("The uploaded image must be 10 MB or smaller.");
+            throw new ArgumentException(
+                "The uploaded image must be 10 MB or smaller.");
         }
-        var consultationExists = await _dbContext.Consultations
-            .AnyAsync(c => c.Id == consultationId, cancellationToken);
 
-        if (!consultationExists)
+        var consultation = await _dbContext.Consultations
+            .FirstOrDefaultAsync(
+                c => c.Id == consultationId,
+                cancellationToken);
+
+        if (consultation is null)
         {
             throw new ConsultationNotFoundException(consultationId);
+        }
+
+        if (imageType == ConsultationImageType.FinalResult &&
+            consultation.Status == ConsultationStatus.Completed)
+        {
+            throw new ArgumentException(
+                "A final result cannot be uploaded to a completed consultation.");
         }
 
         var storagePath = await _imageStorage.SaveAsync(
@@ -62,28 +104,32 @@ public class ConsultationImageService
         var image = new ConsultationImage
         {
             ConsultationId = consultationId,
-            ImageType = ConsultationImageType.Original,
+            ImageType = imageType,
             ImageAngle = imageAngle,
             StoragePath = storagePath,
             CreatedAt = DateTimeOffset.UtcNow
         };
 
         _dbContext.ConsultationImages.Add(image);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new ConsultationImageResponse
         {
             Id = image.Id,
             ConsultationId = image.ConsultationId,
+            HairCandidateId = image.HairCandidateId,
+            BeardCandidateId = image.BeardCandidateId,
             ImageType = image.ImageType,
             ImageAngle = image.ImageAngle,
             CreatedAt = image.CreatedAt
         };
     }
+
     public async Task<(Stream Stream, string ContentType)> GetImageAsync(
-    long consultationId,
-    long imageId,
-    CancellationToken cancellationToken = default)
+        long consultationId,
+        long imageId,
+        CancellationToken cancellationToken = default)
     {
         var image = await _dbContext.ConsultationImages
             .FirstOrDefaultAsync(
@@ -93,26 +139,29 @@ public class ConsultationImageService
 
         if (image is null)
         {
-            throw new KeyNotFoundException("The consultation image does not exist.");
+            throw new KeyNotFoundException(
+                "The consultation image does not exist.");
         }
 
         var stream = await _imageStorage.OpenReadAsync(
             image.StoragePath,
             cancellationToken);
 
-        var contentType = Path.GetExtension(image.StoragePath).ToLowerInvariant() switch
-        {
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            ".webp" => "image/webp",
-            _ => "application/octet-stream"
-        };
+        var contentType =
+            Path.GetExtension(image.StoragePath).ToLowerInvariant() switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".webp" => "image/webp",
+                _ => "application/octet-stream"
+            };
 
         return (stream, contentType);
     }
+
     public async Task<List<ConsultationImageResponse>> GetImagesAsync(
-    long consultationId,
-    CancellationToken cancellationToken = default)
+        long consultationId,
+        CancellationToken cancellationToken = default)
     {
         return await _dbContext.ConsultationImages
             .Where(i => i.ConsultationId == consultationId)

@@ -261,4 +261,41 @@ public class ConsultationController : ControllerBase
 
         return Ok(response);
     }
+    [HttpPut("/api/consultations/{consultationId:long}/notes")]
+    public async Task<ActionResult<ConsultationResponse>> UpdateNotes(
+    long consultationId,
+    UpdateConsultationNotesRequest request,
+    CancellationToken cancellationToken)
+    {
+        var consultation = await _consultationService.UpdateNotesAsync(
+            consultationId,
+            request,
+            cancellationToken);
+
+        return Ok(consultation);
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/images/final-result")]
+    public async Task<ActionResult<ConsultationImageResponse>> UploadFinalResult(
+    long consultationId,
+    IFormFile file,
+    CancellationToken cancellationToken)
+    {
+        var image = await _consultationImageService.UploadFinalResultAsync(
+            consultationId,
+            file,
+            cancellationToken);
+
+        return Ok(image);
+    }
+    [HttpPost("/api/consultations/{consultationId:long}/complete")]
+    public async Task<ActionResult<ConsultationResponse>> CompleteConsultation(
+    long consultationId,
+    CancellationToken cancellationToken)
+    {
+        var consultation = await _consultationService.CompleteAsync(
+            consultationId,
+            cancellationToken);
+
+        return Ok(consultation);
+    }
 }
