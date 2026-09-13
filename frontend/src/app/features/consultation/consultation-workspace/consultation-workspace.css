@@ -5,59 +5,6 @@
   padding: 56px 32px 100px;
 }
 
-/* HEADER */
-
-.customer-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  margin-bottom: 56px;
-}
-
-.status {
-  display: inline-block;
-  margin-bottom: 16px;
-  color: #b89b62;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.customer-header h1 {
-  margin: 0;
-  max-width: 700px;
-  font-size: clamp(42px, 6vw, 72px);
-  line-height: 0.95;
-  letter-spacing: -0.05em;
-}
-
-.customer-header p {
-  margin: 18px 0 0;
-  color: #858585;
-  font-size: 15px;
-}
-
-.consultation-mark {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
-  padding-bottom: 4px;
-}
-
-.consultation-mark span {
-  color: #666666;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.consultation-mark strong {
-  color: #d9d3c8;
-  font-size: 18px;
-}
 
 /* SHARED */
 
@@ -367,18 +314,6 @@
     #1a1a1a;
 }
 
-.style-index {
-  position: absolute;
-  right: 26px;
-  bottom: 30px;
-  color: #202020;
-  font-size: clamp(150px, 17vw, 245px);
-  font-weight: 800;
-  line-height: 0.75;
-  letter-spacing: -0.1em;
-  pointer-events: none;
-  user-select: none;
-}
 
 .style-counter {
   position: relative;
@@ -405,8 +340,7 @@
 .style-stage-content {
   position: relative;
   z-index: 2;
-  max-width: 580px;
-  max-width: 48%;
+max-width: 48%;
   margin: auto 0;
   padding: 50px 0;
 }
@@ -699,13 +633,6 @@
     right: 30px;
   }
 
-  .photo-visual {
-    min-height: 360px;
-  }
-
-  .photo-visual img {
-  height: 360px;
-}
 
   .hair-experience {
     grid-template-columns: 1fr;
@@ -721,17 +648,8 @@
     padding: 32px 18px 70px;
   }
 
-  .customer-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
 
-  .consultation-mark {
-    align-items: flex-start;
-  }
-
-  .photo-content,
-  .hair-section {
+  .hair-section{
     padding: 28px;
   }
 
@@ -749,9 +667,7 @@
     font-size: 48px;
   }
 
-  .style-index {
-    font-size: 150px;
-  }
+
 }
 .beard-section {
   margin-top: 32px;
@@ -1172,53 +1088,7 @@
   color: #d7b978;
 }
 
-.side-upload-state {
-  min-height: 360px;
-  padding: 42px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 16px;
-  border: 1px dashed #343434;
-  border-radius: 18px;
-  background:
-    radial-gradient(
-      circle at 20% 0%,
-      rgba(184, 155, 98, 0.06),
-      transparent 35%
-    ),
-    #181818;
-}
 
-.side-upload-state h3 {
-  margin: 6px 0 8px;
-  font-size: 26px;
-  font-weight: 500;
-  color: #f4f1ea;
-}
-
-.side-upload-state p {
-  max-width: 520px;
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.7;
-  color: #858585;
-}
-
-.side-photo-ready {
-  overflow: hidden;
-  border: 1px solid #292929;
-  border-radius: 18px;
-  background: #101010;
-}
-
-.side-photo-ready img {
-  display: block;
-  width: 100%;
-  height: 500px;
-  object-fit: contain;
-}
 .consultation-hero {
   position: relative;
   min-height: 250px;
@@ -1417,16 +1287,6 @@
   text-transform: uppercase;
 }
 
-.finish-heading h2 {
-  margin: 0;
-
-  color: #eee9df;
-
-  font-size: clamp(28px, 4vw, 42px);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.04em;
-}
 
 .finish-grid {
   display: grid;
