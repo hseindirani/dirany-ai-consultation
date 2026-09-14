@@ -7,11 +7,15 @@ services:
       - .env
     ports:
       - "8080:8080"
+    volumes:
+      - ./backend/DiranyAI.Api/uploads:/app/uploads
 
   frontend:
     build:
       context: ./frontend
     container_name: diranyai-frontend-container
+    environment:
+      BACKEND_URL: http://diranyai-api-container:8080
     ports:
       - "8081:80"
     depends_on:
