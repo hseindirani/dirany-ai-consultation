@@ -1,0 +1,73 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci-cd.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name diranyaicr
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            -t diranyaicr.azurecr.io/diranyai-frontend:${{ github.sha }} \
+            -t diranyaicr.azurecr.io/diranyai-frontend:latest \
+            frontend
+
+      - name: Push frontend image
+        run: |
+          docker push diranyaicr.azurecr.io/diranyai-frontend:${{ github.sha }}
+          docker push diranyaicr.azurecr.io/diranyai-frontend:latest
+
+      - name: Deploy frontend to Azure Container Apps
+        run: |
+          az containerapp update \
+            --name diranyai-frontend \
+            --resource-group rg-diranyai-dev \
+            --image diranyaicr.azurecr.io/diranyai-frontend:${{ github.sha }}
