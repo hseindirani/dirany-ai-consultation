@@ -5,6 +5,8 @@ using DiranyAI.Api.Customers;
 using DiranyAI.Api.Data;
 using DiranyAI.Api.Storage;
 using Microsoft.EntityFrameworkCore;
+using Azure.Identity;
+using Azure.Storage.Blobs;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
@@ -33,8 +35,19 @@ builder.Services.AddScoped<BeardPreviewService>();
 builder.Services.AddScoped<CombinedPreviewService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-builder.Services.AddScoped<IImageStorage, LocalImageStorage>();
+var storageProvider =
+    builder.Configuration["Storage:Provider"] ?? "Local";
 
+if (storageProvider.Equals(
+    "Azure",
+    StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddScoped<IImageStorage, AzureBlobImageStorage>();
+}
+else
+{
+    builder.Services.AddScoped<IImageStorage, LocalImageStorage>();
+}
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -44,6 +57,21 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+});
+
+
+builder.Services.AddSingleton<BlobServiceClient>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+
+    var accountName =
+        configuration["AzureStorage:AccountName"]
+        ?? throw new InvalidOperationException(
+            "Azure Storage account name is not configured.");
+
+    return new BlobServiceClient(
+        new Uri($"https://{accountName}.blob.core.windows.net"),
+        new DefaultAzureCredential());
 });
 
 var app = builder.Build();

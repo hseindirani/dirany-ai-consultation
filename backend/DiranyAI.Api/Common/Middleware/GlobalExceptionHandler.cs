@@ -6,11 +6,23 @@ namespace DiranyAI.Api.Common.Middleware;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
+    private readonly ILogger<GlobalExceptionHandler> _logger;
+
+    public GlobalExceptionHandler(
+        ILogger<GlobalExceptionHandler> logger)
+    {
+        _logger = logger;
+    }
+
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
+        _logger.LogError(
+            exception,
+            "Unhandled exception occurred while processing the request.");
+
         var problemDetails = exception switch
         {
             CustomerAlreadyExistsException => new ProblemDetails
@@ -26,12 +38,14 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Title = "Customer not found",
                 Detail = exception.Message
             },
+
             ConsultationNotFoundException => new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Consultation not found",
                 Detail = exception.Message
             },
+
             ArgumentException => new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
