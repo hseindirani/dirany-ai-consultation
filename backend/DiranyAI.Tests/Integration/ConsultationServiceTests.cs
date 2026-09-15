@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using DiranyAI.Api.Consultations;
 using DiranyAI.Api.Customers;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace DiranyAI.Tests.Integration;
 
@@ -53,7 +54,10 @@ public class ConsultationServiceTests
             context.Consultations.Add(consultation);
             await context.SaveChangesAsync();
 
-            var service = new ConsultationService(context);
+            var service = new ConsultationService(
+                context,
+                NullLogger<ConsultationService>.Instance);
+
 
             var exception = await Assert.ThrowsAsync<ArgumentException>(
                 () => service.CompleteAsync(consultation.Id));
@@ -104,7 +108,9 @@ public class ConsultationServiceTests
             context.ConsultationImages.Add(finalResult);
             await context.SaveChangesAsync();
 
-            var service = new ConsultationService(context);
+            var service = new ConsultationService(
+                          context,
+                          NullLogger<ConsultationService>.Instance);
 
             var result = await service.CompleteAsync(consultation.Id);
 

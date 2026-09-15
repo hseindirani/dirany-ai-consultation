@@ -9,10 +9,14 @@ namespace DiranyAI.Api.Consultations;
 public class ConsultationService
 {
     private readonly AppDbContext _dbContext;
+    private readonly ILogger<ConsultationService> _logger;
 
-    public ConsultationService(AppDbContext dbContext)
+    public ConsultationService(
+        AppDbContext dbContext,
+        ILogger<ConsultationService> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<ConsultationResponse> CreateConsultationAsync(
@@ -141,6 +145,10 @@ public class ConsultationService
         consultation.CompletedAt = DateTimeOffset.UtcNow;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation(
+               "Consultation {ConsultationId} completed for customer {CustomerId}",
+                consultation.Id,
+                consultation.CustomerId);
 
         return new ConsultationResponse
         {
