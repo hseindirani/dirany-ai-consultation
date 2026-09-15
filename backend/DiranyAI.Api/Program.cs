@@ -7,6 +7,8 @@ using DiranyAI.Api.Storage;
 using Microsoft.EntityFrameworkCore;
 using Azure.Identity;
 using Azure.Storage.Blobs;
+using Microsoft.Data.Sqlite;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
@@ -17,9 +19,28 @@ builder.Services
         options.JsonSerializerOptions.Converters.Add(
             new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+if (builder.Environment.IsEnvironment("IntegrationTesting"))
+{
+    builder.Services.AddSingleton(
+        new SqliteConnection("DataSource=:memory:"));
+}
+builder.Services.AddDbContext<AppDbContext>((services, options) =>
+{
+    if (builder.Environment.IsEnvironment("IntegrationTesting"))
+    {
+        var connection = services.GetRequiredService<SqliteConnection>();
+
+        if (connection.State != System.Data.ConnectionState.Open)
+            connection.Open();
+
+        options.UseSqlite(connection);
+    }
+    else
+    {
+        options.UseNpgsql(
+            builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+});
 builder.Services.Configure<AzureOpenAIOptions>(
     builder.Configuration.GetSection(AzureOpenAIOptions.SectionName));
 builder.Services.AddScoped<CustomerService>();
@@ -89,3 +110,4 @@ app.UseCors("Frontend");
 app.MapControllers();
 
 app.Run();
+public partial class Program { }
