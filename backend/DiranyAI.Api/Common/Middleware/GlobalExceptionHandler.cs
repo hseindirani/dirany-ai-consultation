@@ -19,9 +19,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(
-            exception,
-            "Unhandled exception occurred while processing the request.");
+        
 
         var problemDetails = exception switch
         {
@@ -59,6 +57,19 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Title = "An unexpected error occurred"
             }
         };
+        if (problemDetails.Status >= 500)
+        {
+            _logger.LogError(
+                exception,
+                "Unexpected server error occurred while processing the request.");
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Request failed with status {StatusCode}: {ExceptionMessage}",
+                problemDetails.Status,
+                exception.Message);
+        }
 
         httpContext.Response.StatusCode = problemDetails.Status!.Value;
 
