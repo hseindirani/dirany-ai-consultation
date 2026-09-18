@@ -34,7 +34,10 @@ The application helps barbers and customers explore hairstyle and beard options,
 - Azure Database for PostgreSQL
 - Azure Blob Storage
 - Azure AI / GPT Image
+- Azure Key Vault
+- Azure Application Insights
 - Managed Identity & RBAC
+- Bicep (Infrastructure as Code)
 
 **DevOps**
 - Docker & Docker Compose
@@ -92,10 +95,13 @@ Consultation History
 The application uses Azure-managed infrastructure for its deployed environment.
 
 - Private Blob Storage for customer images
-- Managed Identity and RBAC for Blob access
-- Secrets kept outside source control
+- Managed Identity and RBAC for secure Azure resource access
+- Azure Key Vault for application secrets
+- Application Insights for request, dependency, failure, and application telemetry
 - HTTPS through Azure Container Apps
 - Separate GitHub Actions CI/CD pipelines for automated frontend and backend deployments
+- Azure infrastructure defined using Bicep
+
 
 ## Local Development
 
