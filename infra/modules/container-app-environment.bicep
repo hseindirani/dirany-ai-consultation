@@ -49,3 +49,4 @@ peerTrafficConfiguration: {
 
 
 }
+output environmentId string = containerAppsEnvironment.id
