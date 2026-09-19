@@ -35,8 +35,8 @@ public class HairStyleConfiguration : IEntityTypeConfiguration<HairStyle>
     {
         Id = 2,
         Name = "Buzz Cut",
-        Description = "A very short, even haircut with a clean and simple finish.",
-        AiPromptHint = "short buzz cut with even length and a clean natural hairline",
+        Description = "A very short buzz cut with a sharp lineup and a clean skin fade on the sides and back.",
+        AiPromptHint = "a very short buzz cut with an even cropped top, a clean sharp natural lineup around the forehead and temples, and a skin fade on the sides and back blending smoothly into the short top",
         IsActive = true
     },
     new HairStyle
@@ -61,6 +61,30 @@ public class HairStyleConfiguration : IEntityTypeConfiguration<HairStyle>
         Name = "Slick Back",
         Description = "Longer hair on top styled backward for a clean structured look.",
         AiPromptHint = "slicked-back hairstyle with longer hair on top styled naturally backward",
+        IsActive = true
+    },
+    new HairStyle
+    {
+        Id = 6,
+        Name = "Classic Side Part",
+        Description = "A clean classic haircut with a defined side part, neatly styled top, and tapered sides.",
+        AiPromptHint = "classic side-part haircut with a clean defined natural side part, neatly combed top with moderate length and volume, and clean tapered shorter sides",
+        IsActive = true
+    },
+    new HairStyle
+    {
+        Id = 7,
+        Name = "Quiff",
+        Description = "A voluminous hairstyle with the front lifted upward and backward while keeping the sides shorter.",
+        AiPromptHint = "modern quiff with medium-length hair on top, noticeable natural volume at the front styled upward and slightly backward, with shorter clean sides",
+        IsActive = true
+    },
+    new HairStyle
+    {
+        Id = 8,
+        Name = "Mullet",
+        Description = "A modern mullet with shorter sides, textured hair on top, and clearly longer hair at the back.",
+        AiPromptHint = "modern textured mullet with shorter clean sides, textured medium-length hair on top, and visibly longer layered hair extending at the back",
         IsActive = true
     }
 );

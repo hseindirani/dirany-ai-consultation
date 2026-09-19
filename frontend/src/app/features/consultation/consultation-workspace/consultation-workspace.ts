@@ -874,6 +874,9 @@ export class ConsultationWorkspace implements OnInit {
       Mohawk: "/images/styles/hair/mohawk.png",
       "Textured Crop": "/images/styles/hair/textured-crop.png",
       "Slick Back": "/images/styles/hair/slick-back.png",
+      "Classic Side Part": "/images/styles/hair/classic-side-part.png",
+      Quiff: "/images/styles/hair/quiff.png",
+      Mullet: "/images/styles/hair/mullet.png",
     };
 
     return images[styleName] ?? "";
