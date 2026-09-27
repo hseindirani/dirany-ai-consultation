@@ -632,6 +632,7 @@ max-width: 48%;
   .section-number {
     right: 30px;
   }
+  
 
 
   .hair-experience {
@@ -647,6 +648,29 @@ max-width: 48%;
   .workspace {
     padding: 32px 18px 70px;
   }
+  .photo-section {
+    padding: 28px 24px;
+  }
+
+  .section-number {
+    top: 18px;
+    right: 26px;
+    font-size: 82px;
+  }
+
+  .photo-section-header h2 {
+    margin: 12px 0 14px;
+    font-size: 32px;
+    line-height: 1.08;
+  }
+
+  .photo-section-header p {
+    display: none;
+  }
+
+  .photo-reference-visual {
+    height: 360px;
+  }
 
 
   .hair-section{
@@ -654,9 +678,20 @@ max-width: 48%;
   }
 
   .section-intro {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.section-intro h2 {
+  margin-top: 10px;
+  font-size: 32px;
+  line-height: 1.05;
+}
+
+.section-intro > p {
+  display: none;
+}
 
   .style-stage {
     min-height: 520px;
@@ -664,8 +699,8 @@ max-width: 48%;
   }
 
   .style-stage-content h3 {
-    font-size: 48px;
-  }
+  font-size: clamp(38px, 10vw, 48px);
+}
 
 
 }
@@ -711,6 +746,9 @@ max-width: 48%;
   .beard-section {
     padding: 28px;
   }
+  .style-stage-content {
+  max-width: 68%;
+}
 }
 .style-reference-image {
   position: absolute;
@@ -795,6 +833,7 @@ max-width: 48%;
   display: flex;
   flex-direction: column;
 }
+
 
 .shortlist-item-content h4 {
   margin: 3px 0 6px;
@@ -1036,8 +1075,16 @@ max-width: 48%;
     padding: 28px 24px 24px;
   }
 
+  .preview-studio-heading p {
+    display: none;
+  }
+
   .preview-studio-body {
     padding: 22px 24px 28px;
+  }
+
+  .preview-studio-selection {
+    display: none;
   }
 
   .preview-mode-tab {
@@ -1697,4 +1744,9 @@ max-width: 48%;
   .complete-consultation-button {
     width: 100%;
   }
+}
+@media (max-width: 600px) {
+    .consultation-number-card {
+        display: none;
+    }
 }
