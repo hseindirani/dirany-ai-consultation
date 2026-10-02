@@ -3,6 +3,7 @@ using DiranyAI.Api.Consultations;
 using DiranyAI.Api.Customers;
 using DiranyAI.Api.Data;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Json;
 
 namespace DiranyAI.Tests.Integration;
 
@@ -52,11 +53,59 @@ public class ConsultationApiTests
         }
 
         var client = factory.CreateClient();
+        var csrfResponse = await client.GetAsync("/api/auth/csrf-token");
+        csrfResponse.EnsureSuccessStatusCode();
+
+        var csrfData = await csrfResponse.Content
+            .ReadFromJsonAsync<CsrfTokenResponse>();
+
+        client.DefaultRequestHeaders.Add(
+            "X-CSRF-TOKEN",
+            csrfData!.Token);
 
         var response = await client.PostAsync(
             $"/api/consultations/{consultationId}/complete",
             null);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    private sealed class CsrfTokenResponse
+    {
+        public string Token { get; set; } = string.Empty;
+    }
+    [Fact]
+    public async Task ProtectedEndpoint_WithoutAuthentication_ReturnsUnauthorized()
+    {
+        await using var factory = new CustomWebApplicationFactory();
+        var client = factory.CreateClient();
+
+        client.DefaultRequestHeaders.Add(
+            "X-Test-Anonymous",
+            "true");
+
+        var response = await client.GetAsync("/api/hair-styles");
+
+        Assert.Equal(
+            HttpStatusCode.Unauthorized,
+            response.StatusCode);
+    }
+    [Fact]
+    public async Task UnsafeRequest_WithoutCsrfToken_ReturnsBadRequest()
+    {
+        await using var factory = new CustomWebApplicationFactory();
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync(
+            "/api/customers",
+            new
+            {
+                firstName = "Csrf",
+                lastName = "Test",
+                phoneNumber = "12345678"
+            });
+
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            response.StatusCode);
     }
 }
