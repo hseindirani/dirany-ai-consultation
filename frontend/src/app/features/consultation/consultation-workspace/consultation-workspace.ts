@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, signal } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { PreviewComparison } from "../../../shared/preview-comparison/preview-comparison";
+import { SignOut } from '../../../shared/sign-out/sign-out';
 
 import {
   BeardCandidate,
@@ -16,7 +17,7 @@ import {
 
 @Component({
   selector: "app-consultation-workspace",
-  imports: [PreviewComparison, RouterLink],
+  imports: [PreviewComparison, RouterLink, SignOut],
   templateUrl: "./consultation-workspace.html",
   styleUrl: "./consultation-workspace.css",
 })

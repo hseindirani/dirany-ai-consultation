@@ -1,0 +1,8 @@
+<button
+  type="button"
+  class="sign-out-button"
+  [disabled]="isSigningOut()"
+  (click)="signOut()"
+>
+  {{ isSigningOut() ? 'Signing out...' : 'Sign out' }}
+</button>

@@ -1,8 +1,13 @@
 @if (consultation() && customer()) {
 <main class="workspace">
-    <a class="workspace-back-link" [routerLink]="['/consultation/new']" [queryParams]="{ customerId: customer()?.id }">
-        ← Customer
-    </a>
+    <div class="workspace-utility-bar">
+        <a class="workspace-back-link" [routerLink]="['/consultation/new']"
+            [queryParams]="{ customerId: customer()?.id }">
+            ← Customer
+        </a>
+
+        <app-sign-out />
+    </div>
 
     <header class="consultation-hero">
 

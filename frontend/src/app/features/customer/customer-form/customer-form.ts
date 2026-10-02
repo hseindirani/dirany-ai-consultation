@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from "@angular/core";
 import { DatePipe } from "@angular/common";
+import { SignOut } from '../../../shared/sign-out/sign-out';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from "@angular/forms";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router} from "@angular/router";
 
 import {
   Customer,
@@ -16,7 +17,7 @@ import {
 import { Consultation } from "../../../core/services/consultation";
 
 @Component({
-  imports: [RouterLink, ReactiveFormsModule, DatePipe],
+  imports: [ReactiveFormsModule, DatePipe, SignOut],
   selector: "app-customer-form",
   styleUrl: "./customer-form.css",
   templateUrl: "./customer-form.html",

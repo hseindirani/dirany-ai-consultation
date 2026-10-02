@@ -494,3 +494,8 @@
     justify-self: stretch;
   }
 }
+.customer-utility-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
