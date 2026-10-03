@@ -11,6 +11,7 @@ using Microsoft.Data.Sqlite;
 using DiranyAI.Api.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -145,6 +146,21 @@ builder.Services.AddSingleton<BlobServiceClient>(sp =>
         new Uri($"https://{accountName}.blob.core.windows.net"),
         new DefaultAzureCredential());
 });
+if (!builder.Environment.IsDevelopment() &&
+    !builder.Environment.IsEnvironment("IntegrationTesting"))
+{
+    var storageAccountName =
+        builder.Configuration["AzureStorage:AccountName"]
+        ?? throw new InvalidOperationException(
+            "Azure Storage account name is not configured.");
+
+    builder.Services.AddDataProtection()
+        .PersistKeysToAzureBlobStorage(
+            new Uri(
+                $"https://{storageAccountName}.blob.core.windows.net/data-protection/keys.xml"),
+            new DefaultAzureCredential())
+        .SetApplicationName("DiranyAI");
+}
 
 var app = builder.Build();
 app.UseExceptionHandler();
